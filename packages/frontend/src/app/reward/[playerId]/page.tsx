@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { v4 as uuidv4 } from "crypto";
+function uuidv4(): string {
+  return crypto.randomUUID();
+}
 import { api } from "@/lib/api";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import { useGeo } from "@/hooks/useGeo";

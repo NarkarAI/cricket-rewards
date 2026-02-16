@@ -74,7 +74,7 @@ def create_app() -> FastAPI:
 fastapi_app = create_app()
 
 # Mount Socket.io as ASGI app
-socket_app = socketio.ASGIApp(sio, other_app=fastapi_app)
+socket_app = socketio.ASGIApp(sio, fastapi_app)
 
 # This is the ASGI entry point
 app = socket_app
