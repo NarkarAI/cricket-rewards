@@ -5,6 +5,14 @@ import { auth, onAuthStateChanged, type FirebaseUser } from "@/lib/firebase";
 import { api } from "@/lib/api";
 import type { User } from "@/types";
 
+function setAuthCookie(token: string | null) {
+  if (token) {
+    document.cookie = `firebase-auth-token=${token}; path=/; max-age=3600; SameSite=Lax`;
+  } else {
+    document.cookie = "firebase-auth-token=; path=/; max-age=0";
+  }
+}
+
 export function useAuth() {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -15,13 +23,17 @@ export function useAuth() {
       setFirebaseUser(fbUser);
       if (fbUser) {
         try {
+          const token = await fbUser.getIdToken();
+          setAuthCookie(token);
           const me = await api.getMe();
           setUser(me);
         } catch {
           setUser(null);
+          setAuthCookie(null);
         }
       } else {
         setUser(null);
+        setAuthCookie(null);
       }
       setLoading(false);
     });

@@ -88,11 +88,11 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="mt-8 flex gap-4">
-        <Link href="/players" className="bg-primary text-white px-6 py-2 rounded-lg">
+      <div className="mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4">
+        <Link href="/players" className="bg-primary text-white px-6 py-2 rounded-lg text-center">
           Browse Players
         </Link>
-        <Link href="/wallet" className="border border-primary text-primary px-6 py-2 rounded-lg">
+        <Link href="/wallet" className="border border-primary text-primary px-6 py-2 rounded-lg text-center">
           Wallet Details
         </Link>
       </div>

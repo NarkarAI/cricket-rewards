@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { registerWithEmail, loginWithGoogle } from "@/lib/firebase";
+import { registerWithEmail, loginWithGoogle, handleGoogleRedirectResult } from "@/lib/firebase";
 import { api } from "@/lib/api";
 
 export default function RegisterPage() {
@@ -14,6 +14,18 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Handle Google redirect result (mobile flow)
+  useEffect(() => {
+    handleGoogleRedirectResult().then(async (result) => {
+      if (result?.user) {
+        const token = await result.user.getIdToken();
+        document.cookie = `firebase-auth-token=${token}; path=/; max-age=3600; SameSite=Lax`;
+        await api.register(token, result.user.displayName || "");
+        router.push("/dashboard");
+      }
+    });
+  }, []);
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -21,6 +33,7 @@ export default function RegisterPage() {
     try {
       const cred = await registerWithEmail(email, password);
       const token = await cred.user.getIdToken();
+      document.cookie = `firebase-auth-token=${token}; path=/; max-age=3600; SameSite=Lax`;
       await api.register(token, name);
       router.push("/dashboard");
     } catch (err: any) {
@@ -35,16 +48,19 @@ export default function RegisterPage() {
     try {
       const cred = await loginWithGoogle();
       const token = await cred.user.getIdToken();
+      document.cookie = `firebase-auth-token=${token}; path=/; max-age=3600; SameSite=Lax`;
       await api.register(token, cred.user.displayName || "");
       router.push("/dashboard");
     } catch (err: any) {
-      setError(err.message);
+      if (err.message !== "Redirecting...") {
+        setError(err.message);
+      }
     }
     setLoading(false);
   };
 
   return (
-    <div className="max-w-md mx-auto mt-16 p-8 bg-white rounded-xl shadow-sm border">
+    <div className="max-w-md mt-8 sm:mt-16 p-6 sm:p-8 bg-white rounded-xl shadow-sm border mx-4 sm:mx-auto">
       <h1 className="text-2xl font-bold mb-6 text-center">Create Account</h1>
 
       {error && <div className="bg-red-50 text-red-600 p-3 rounded mb-4 text-sm">{error}</div>}
@@ -56,7 +72,7 @@ export default function RegisterPage() {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full border rounded-lg px-3 py-2"
+            className="w-full border rounded-lg px-3 py-2 text-base"
             required
           />
         </div>
@@ -66,7 +82,7 @@ export default function RegisterPage() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border rounded-lg px-3 py-2"
+            className="w-full border rounded-lg px-3 py-2 text-base"
             required
           />
         </div>
@@ -76,7 +92,7 @@ export default function RegisterPage() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border rounded-lg px-3 py-2"
+            className="w-full border rounded-lg px-3 py-2 text-base"
             minLength={6}
             required
           />
@@ -84,7 +100,7 @@ export default function RegisterPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-primary text-white py-2 rounded-lg hover:bg-primary-dark disabled:opacity-50"
+          className="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary-dark disabled:opacity-50 text-base"
         >
           {loading ? "Creating account..." : "Register"}
         </button>
@@ -94,7 +110,7 @@ export default function RegisterPage() {
         <button
           onClick={handleGoogleRegister}
           disabled={loading}
-          className="w-full border border-gray-300 py-2 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+          className="w-full border border-gray-300 py-3 rounded-lg hover:bg-gray-50 disabled:opacity-50 text-base"
         >
           Sign up with Google
         </button>

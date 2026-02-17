@@ -71,12 +71,23 @@ async def sync_claims(req: SyncClaimsRequest, admin: User = Depends(require_admi
     return {"status": "ok", "uid": req.uid, "role": req.role}
 
 
-@router.get("/me", response_model=AuthResponse)
+@router.get("/me")
 async def get_me(user: User = Depends(get_current_user)):
-    return AuthResponse(
-        id=str(user.id),
-        firebase_uid=user.firebase_uid,
-        email=user.email,
-        display_name=user.display_name,
-        role=user.role,
-    )
+    return {
+        "id": str(user.id),
+        "firebase_uid": user.firebase_uid,
+        "email": user.email,
+        "display_name": user.display_name,
+        "avatar_url": user.avatar_url,
+        "role": user.role,
+        "sport": user.sport,
+        "team": user.team,
+        "bio": user.bio,
+        "is_verified_player": user.is_verified_player,
+        "geo": {
+            "country_code": user.geo.country_code,
+            "currency": user.geo.currency,
+            "detected_ip": user.geo.detected_ip,
+        },
+        "kyc_status": user.kyc_status,
+    }

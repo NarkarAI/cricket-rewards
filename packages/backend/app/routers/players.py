@@ -14,8 +14,8 @@ async def list_players(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
 ):
-    """List verified players with pagination and search."""
-    query_filter = {"is_verified_player": True, "role": "player"}
+    """List all players with pagination and search."""
+    query_filter = {"role": "player"}
 
     if search:
         query_filter["$or"] = [
@@ -46,6 +46,8 @@ async def list_players(
                 sport=u.sport,
                 team=u.team,
                 bio=u.bio,
+                is_verified_player=u.is_verified_player,
+                kyc_status=u.kyc_status,
                 total_rewards_received=reward_count,
             )
         )
@@ -71,6 +73,7 @@ async def get_player(player_id: str):
         team=user.team,
         bio=user.bio,
         is_verified_player=user.is_verified_player,
+        kyc_status=user.kyc_status,
         total_rewards_received=reward_count,
     )
 

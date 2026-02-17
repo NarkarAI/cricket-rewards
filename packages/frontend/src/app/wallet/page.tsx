@@ -61,28 +61,28 @@ export default function WalletPage() {
 
       {wallet && (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-white p-6 rounded-xl border">
-              <p className="text-sm text-gray-500">Available</p>
-              <p className="text-2xl font-bold text-green-600">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-8">
+            <div className="bg-white p-4 sm:p-6 rounded-xl border">
+              <p className="text-xs sm:text-sm text-gray-500">Available</p>
+              <p className="text-lg sm:text-2xl font-bold text-green-600 truncate">
                 {wallet.currency} {wallet.available_balance}
               </p>
             </div>
-            <div className="bg-white p-6 rounded-xl border">
-              <p className="text-sm text-gray-500">Pending</p>
-              <p className="text-2xl font-bold text-yellow-600">
+            <div className="bg-white p-4 sm:p-6 rounded-xl border">
+              <p className="text-xs sm:text-sm text-gray-500">Pending</p>
+              <p className="text-lg sm:text-2xl font-bold text-yellow-600 truncate">
                 {wallet.currency} {wallet.pending_balance}
               </p>
             </div>
-            <div className="bg-white p-6 rounded-xl border">
-              <p className="text-sm text-gray-500">Held</p>
-              <p className="text-2xl font-bold text-red-600">
+            <div className="bg-white p-4 sm:p-6 rounded-xl border">
+              <p className="text-xs sm:text-sm text-gray-500">Held</p>
+              <p className="text-lg sm:text-2xl font-bold text-red-600 truncate">
                 {wallet.currency} {wallet.held_balance}
               </p>
             </div>
-            <div className="bg-white p-6 rounded-xl border">
-              <p className="text-sm text-gray-500">Lifetime Received</p>
-              <p className="text-2xl font-bold">
+            <div className="bg-white p-4 sm:p-6 rounded-xl border">
+              <p className="text-xs sm:text-sm text-gray-500">Lifetime Received</p>
+              <p className="text-lg sm:text-2xl font-bold truncate">
                 {wallet.currency} {wallet.lifetime_received}
               </p>
             </div>
@@ -91,7 +91,7 @@ export default function WalletPage() {
           {user.role === "player" && (
             <div className="bg-white p-6 rounded-xl border mb-8">
               <h2 className="text-lg font-bold mb-4">Withdraw Funds</h2>
-              <div className="flex gap-4 items-end">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-end">
                 <div className="flex-1">
                   <label className="block text-sm text-gray-600 mb-1">Amount ({wallet.currency})</label>
                   <input
@@ -130,7 +130,7 @@ export default function WalletPage() {
           <>
             <div className="divide-y">
               {history.items.map((entry) => (
-                <div key={entry.entry_id} className="p-4 flex items-center justify-between">
+                <div key={entry.entry_id} className="p-3 sm:p-4 flex items-start sm:items-center justify-between gap-2">
                   <div>
                     <p className="font-medium">{formatEntryType(entry.entry_type)}</p>
                     <p className="text-sm text-gray-500">{entry.description}</p>

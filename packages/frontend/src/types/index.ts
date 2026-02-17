@@ -27,6 +27,7 @@ export interface Player {
   team: string;
   bio: string;
   is_verified_player: boolean;
+  kyc_status: string;
   total_rewards_received: number;
   total_amount_received: string;
 }

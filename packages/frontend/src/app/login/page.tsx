@@ -1,24 +1,50 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { loginWithEmail, loginWithGoogle } from "@/lib/firebase";
+import { loginWithEmail, loginWithGoogle, handleGoogleRedirectResult } from "@/lib/firebase";
+import { api } from "@/lib/api";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect") || "/dashboard";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Handle Google redirect result (mobile flow)
+  useEffect(() => {
+    handleGoogleRedirectResult().then(async (result) => {
+      if (result?.user) {
+        const token = await result.user.getIdToken();
+        document.cookie = `firebase-auth-token=${token}; path=/; max-age=3600; SameSite=Lax`;
+        await ensureBackendUser(token, result.user.displayName || "");
+        router.push(redirect);
+      }
+    });
+  }, []);
+
+  const ensureBackendUser = async (firebaseToken: string, displayName: string) => {
+    try {
+      await api.getMe();
+    } catch {
+      await api.register(firebaseToken, displayName);
+    }
+  };
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
-      await loginWithEmail(email, password);
-      router.push("/dashboard");
+      const cred = await loginWithEmail(email, password);
+      const token = await cred.user.getIdToken();
+      document.cookie = `firebase-auth-token=${token}; path=/; max-age=3600; SameSite=Lax`;
+      await ensureBackendUser(token, cred.user.displayName || "");
+      router.push(redirect);
     } catch (err: any) {
       setError(err.message);
     }
@@ -29,16 +55,21 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
     try {
-      await loginWithGoogle();
-      router.push("/dashboard");
+      const cred = await loginWithGoogle();
+      const token = await cred.user.getIdToken();
+      document.cookie = `firebase-auth-token=${token}; path=/; max-age=3600; SameSite=Lax`;
+      await ensureBackendUser(token, cred.user.displayName || "");
+      router.push(redirect);
     } catch (err: any) {
-      setError(err.message);
+      if (err.message !== "Redirecting...") {
+        setError(err.message);
+      }
     }
     setLoading(false);
   };
 
   return (
-    <div className="max-w-md mx-auto mt-16 p-8 bg-white rounded-xl shadow-sm border">
+    <div className="max-w-md mt-8 sm:mt-16 p-6 sm:p-8 bg-white rounded-xl shadow-sm border mx-4 sm:mx-auto">
       <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
 
       {error && <div className="bg-red-50 text-red-600 p-3 rounded mb-4 text-sm">{error}</div>}
@@ -50,7 +81,7 @@ export default function LoginPage() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border rounded-lg px-3 py-2"
+            className="w-full border rounded-lg px-3 py-2 text-base"
             required
           />
         </div>
@@ -60,14 +91,14 @@ export default function LoginPage() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border rounded-lg px-3 py-2"
+            className="w-full border rounded-lg px-3 py-2 text-base"
             required
           />
         </div>
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-primary text-white py-2 rounded-lg hover:bg-primary-dark disabled:opacity-50"
+          className="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary-dark disabled:opacity-50 text-base"
         >
           {loading ? "Signing in..." : "Sign In"}
         </button>
@@ -77,7 +108,7 @@ export default function LoginPage() {
         <button
           onClick={handleGoogleLogin}
           disabled={loading}
-          className="w-full border border-gray-300 py-2 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+          className="w-full border border-gray-300 py-3 rounded-lg hover:bg-gray-50 disabled:opacity-50 text-base"
         >
           Sign in with Google
         </button>
@@ -90,5 +121,13 @@ export default function LoginPage() {
         </Link>
       </p>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="max-w-md mx-auto mt-16 p-8 text-center text-gray-400">Loading...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

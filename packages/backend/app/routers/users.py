@@ -57,6 +57,29 @@ async def get_my_geo(request: Request, user: User = Depends(get_current_user)):
     return GeoResponse(**geo)
 
 
+@router.post("/me/become-player")
+async def become_player(req: UserUpdateRequest, user: User = Depends(get_current_user)):
+    """Spectator requests to become a player. Fills in sport/team/bio and changes role."""
+    if user.role == "player":
+        raise HTTPException(status_code=400, detail="Already a player")
+    if user.role == "admin":
+        raise HTTPException(status_code=400, detail="Admin cannot become a player")
+
+    if req.display_name:
+        user.display_name = req.display_name
+    if req.sport:
+        user.sport = req.sport
+    if req.team:
+        user.team = req.team
+    if req.bio:
+        user.bio = req.bio
+
+    user.role = "player"
+    user.updated_at = datetime.utcnow()
+    await user.save()
+    return _user_response(user)
+
+
 @router.get("/{user_id}", response_model=UserResponse)
 async def get_user(user_id: str):
     user = await User.get(user_id)

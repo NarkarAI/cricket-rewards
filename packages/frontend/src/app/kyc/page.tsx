@@ -184,12 +184,12 @@ export default function KycPage() {
           <div className="divide-y">
             {documents.map((doc) => (
               <div key={doc.id} className="p-4">
-                <div className="flex justify-between items-center mb-2">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2">
                   <div>
-                    <p className="font-medium">
+                    <p className="font-medium text-sm sm:text-base">
                       {DOC_TYPES.find((t) => t.value === doc.document_type)?.label || doc.document_type}
                     </p>
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs text-gray-400 truncate max-w-[200px] sm:max-w-none">
                       {doc.file_name} &middot; {new Date(doc.created_at).toLocaleString()}
                     </p>
                   </div>
@@ -200,7 +200,7 @@ export default function KycPage() {
                     >
                       {previewDoc?.id === doc.id ? "Hide" : "Preview"}
                     </button>
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${docStatusColors[doc.status]}`}>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${docStatusColors[doc.status]}`}>
                       {doc.status.replace("_", " ")}
                     </span>
                   </div>

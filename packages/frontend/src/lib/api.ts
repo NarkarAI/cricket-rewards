@@ -38,6 +38,8 @@ export const api = {
   getUserProfile: () => request<any>("/api/v1/users/me"),
   updateProfile: (data: any) =>
     request("/api/v1/users/me", { method: "PATCH", body: JSON.stringify(data) }),
+  becomePlayer: (data: any) =>
+    request<any>("/api/v1/users/me/become-player", { method: "POST", body: JSON.stringify(data) }),
   getGeo: () => request<any>("/api/v1/users/me/geo"),
 
   // Players

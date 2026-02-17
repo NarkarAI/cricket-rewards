@@ -6,6 +6,8 @@ import {
   signOut,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   onAuthStateChanged,
   type Auth,
   type User as FirebaseUser,
@@ -50,9 +52,29 @@ export async function registerWithEmail(email: string, password: string) {
   return createUserWithEmailAndPassword(getFirebaseAuth(), email, password);
 }
 
+function isMobile(): boolean {
+  if (typeof window === "undefined") return false;
+  return /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+}
+
 export async function loginWithGoogle() {
   const provider = new GoogleAuthProvider();
+  if (isMobile()) {
+    // Use redirect on mobile - popups are blocked
+    await signInWithRedirect(getFirebaseAuth(), provider);
+    // This won't return - page redirects. Result handled via getRedirectResult.
+    throw new Error("Redirecting...");
+  }
   return signInWithPopup(getFirebaseAuth(), provider);
+}
+
+export async function handleGoogleRedirectResult() {
+  try {
+    const result = await getRedirectResult(getFirebaseAuth());
+    return result;
+  } catch {
+    return null;
+  }
 }
 
 export async function logout() {
