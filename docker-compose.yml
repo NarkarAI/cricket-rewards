@@ -64,11 +64,7 @@ services:
       NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${NEXT_PUBLIC_FIREBASE_PROJECT_ID}
     depends_on:
       - backend
-    volumes:
-      - ./packages/frontend:/app
-      - /app/node_modules
-      - /app/.next
-    command: npm run dev
+    command: npm start
 
   nginx:
     image: nginx:alpine

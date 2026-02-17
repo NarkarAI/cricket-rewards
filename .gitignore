@@ -32,6 +32,13 @@ firebase-service-account.json
 mongo_data/
 redis_data/
 
+# PWA generated files
+public/sw.js
+public/sw.js.map
+public/workbox-*.js
+public/workbox-*.js.map
+public/swe-worker-*.js
+
 # Test/Coverage
 .coverage
 htmlcov/

@@ -16,7 +16,8 @@
     "@stripe/stripe-js": "^2.4.0",
     "@stripe/react-stripe-js": "^2.4.0",
     "socket.io-client": "^4.7.0",
-    "razorpay": "^2.9.0"
+    "razorpay": "^2.9.0",
+    "@ducanh2912/next-pwa": "^10.2.9"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
