@@ -6,11 +6,13 @@ import { api } from "@/lib/api";
 import type { KycDocument } from "@/types";
 
 const DOC_TYPES = [
-  { value: "id_proof", label: "Government ID" },
+  { value: "id_proof", label: "Government ID (Required)" },
   { value: "address_proof", label: "Address Proof" },
   { value: "pan_card", label: "PAN Card" },
   { value: "selfie", label: "Selfie with ID" },
 ];
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export default function KycPage() {
   const { user, loading: authLoading } = useAuthContext();
@@ -20,6 +22,7 @@ export default function KycPage() {
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
+  const [previewDoc, setPreviewDoc] = useState<KycDocument | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const fetchStatus = () =>
@@ -36,6 +39,12 @@ export default function KycPage() {
   const handleUpload = async () => {
     const file = fileRef.current?.files?.[0];
     if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      setMessage("File too large. Maximum size is 10MB.");
+      return;
+    }
+
     setUploading(true);
     setMessage("");
     try {
@@ -84,6 +93,9 @@ export default function KycPage() {
     rejected: "bg-red-100 text-red-700",
   };
 
+  const docPreviewUrl = (docId: string) =>
+    `${API_URL}/api/v1/kyc/documents/${docId}/file`;
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-2">KYC Verification</h1>
@@ -124,11 +136,13 @@ export default function KycPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm text-gray-600 mb-1">File</label>
+                <label className="block text-sm text-gray-600 mb-1">
+                  File <span className="text-gray-400">(JPEG, PNG, WebP, or PDF - max 10MB)</span>
+                </label>
                 <input
                   ref={fileRef}
                   type="file"
-                  accept="image/*,.pdf"
+                  accept="image/jpeg,image/png,image/webp,application/pdf"
                   className="w-full border rounded-lg px-3 py-2"
                 />
               </div>
@@ -169,16 +183,50 @@ export default function KycPage() {
           </div>
           <div className="divide-y">
             {documents.map((doc) => (
-              <div key={doc.id} className="p-4 flex justify-between items-center">
-                <div>
-                  <p className="font-medium">
-                    {DOC_TYPES.find((t) => t.value === doc.document_type)?.label || doc.document_type}
-                  </p>
-                  <p className="text-xs text-gray-400">{new Date(doc.created_at).toLocaleString()}</p>
+              <div key={doc.id} className="p-4">
+                <div className="flex justify-between items-center mb-2">
+                  <div>
+                    <p className="font-medium">
+                      {DOC_TYPES.find((t) => t.value === doc.document_type)?.label || doc.document_type}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      {doc.file_name} &middot; {new Date(doc.created_at).toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setPreviewDoc(previewDoc?.id === doc.id ? null : doc)}
+                      className="text-xs text-blue-600 hover:underline"
+                    >
+                      {previewDoc?.id === doc.id ? "Hide" : "Preview"}
+                    </button>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${docStatusColors[doc.status]}`}>
+                      {doc.status.replace("_", " ")}
+                    </span>
+                  </div>
                 </div>
-                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${docStatusColors[doc.status]}`}>
-                  {doc.status.replace("_", " ")}
-                </span>
+                {previewDoc?.id === doc.id && (
+                  <div className="mt-2 border rounded-lg overflow-hidden bg-gray-50 p-2">
+                    {doc.content_type?.startsWith("image/") ? (
+                      <img
+                        src={docPreviewUrl(doc.id)}
+                        alt={doc.file_name}
+                        className="max-w-full max-h-64 mx-auto rounded"
+                      />
+                    ) : (
+                      <div className="text-center py-4">
+                        <a
+                          href={docPreviewUrl(doc.id)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline"
+                        >
+                          Open PDF: {doc.file_name}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>

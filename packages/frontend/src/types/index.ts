@@ -95,6 +95,8 @@ export interface PaginatedResponse<T> {
 export interface KycDocument {
   id: string;
   document_type: string;
+  file_name: string;
+  content_type: string;
   status: string;
   created_at: string;
 }

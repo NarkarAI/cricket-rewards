@@ -28,6 +28,11 @@ class Settings(BaseSettings):
     razorpay_key_secret: str = ""
     razorpay_webhook_secret: str = ""
 
+    # KYC File Storage
+    kyc_upload_dir: str = "/app/uploads/kyc"
+    kyc_max_file_size: int = 10 * 1024 * 1024  # 10MB
+    kyc_allowed_types: str = "image/jpeg,image/png,image/webp,application/pdf"
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",")]

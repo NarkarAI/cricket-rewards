@@ -3,12 +3,16 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 interface KycReviewItem {
   id: string;
   user_id: string;
   document_type: string;
+  file_name: string;
+  content_type: string;
   status: string;
-  submitted_at: string;
+  created_at: string;
   user_name?: string;
   user_email?: string;
 }
@@ -17,6 +21,7 @@ export default function AdminKycReviewPage() {
   const [pending, setPending] = useState<KycReviewItem[]>([]);
   const [reviewNotes, setReviewNotes] = useState<Record<string, string>>({});
   const [processing, setProcessing] = useState<string | null>(null);
+  const [expandedDoc, setExpandedDoc] = useState<string | null>(null);
 
   const fetchPending = () =>
     api.admin.getPendingKyc().then((data: any) => setPending(data.items || data || [])).catch(() => {});
@@ -38,6 +43,17 @@ export default function AdminKycReviewPage() {
     }
   };
 
+  const docPreviewUrl = (docId: string) =>
+    `${API_URL}/api/v1/kyc/documents/${docId}/file`;
+
+  const docTypeLabel = (type: string) =>
+    ({
+      id_proof: "Government ID",
+      address_proof: "Address Proof",
+      pan_card: "PAN Card",
+      selfie: "Selfie with ID",
+    }[type] || type.replace("_", " "));
+
   return (
     <div>
       <h2 className="text-xl font-bold mb-4">KYC Pending Review</h2>
@@ -55,16 +71,47 @@ export default function AdminKycReviewPage() {
                   <p className="font-medium">{doc.user_name || doc.user_id}</p>
                   {doc.user_email && <p className="text-sm text-gray-500">{doc.user_email}</p>}
                   <p className="text-sm text-gray-500 mt-1">
-                    Document: <span className="font-medium">{doc.document_type.replace("_", " ")}</span>
+                    Document: <span className="font-medium">{docTypeLabel(doc.document_type)}</span>
                   </p>
                   <p className="text-xs text-gray-400 mt-1">
-                    Submitted: {new Date(doc.submitted_at).toLocaleString()}
+                    {doc.file_name} &middot; Submitted: {new Date(doc.created_at).toLocaleString()}
                   </p>
                 </div>
-                <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded-full text-xs">
-                  {doc.status}
-                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setExpandedDoc(expandedDoc === doc.id ? null : doc.id)}
+                    className="text-sm text-blue-600 hover:underline"
+                  >
+                    {expandedDoc === doc.id ? "Hide Document" : "View Document"}
+                  </button>
+                  <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded-full text-xs">
+                    {doc.status}
+                  </span>
+                </div>
               </div>
+
+              {expandedDoc === doc.id && (
+                <div className="mb-4 border rounded-lg overflow-hidden bg-gray-50 p-3">
+                  {doc.content_type?.startsWith("image/") ? (
+                    <img
+                      src={docPreviewUrl(doc.id)}
+                      alt={doc.file_name}
+                      className="max-w-full max-h-96 mx-auto rounded"
+                    />
+                  ) : (
+                    <div className="text-center py-6">
+                      <a
+                        href={docPreviewUrl(doc.id)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700"
+                      >
+                        Open PDF: {doc.file_name}
+                      </a>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="mb-4">
                 <label className="block text-sm text-gray-600 mb-1">Review Notes</label>

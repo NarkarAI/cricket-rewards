@@ -8,7 +8,9 @@ from pydantic import Field
 class KycDocument(Document):
     user_id: Indexed(str)
     document_type: str  # id_proof | address_proof | pan_card | selfie
-    file_key: str  # object storage reference
+    file_key: str  # storage path
+    file_name: str = ""  # original filename
+    content_type: str = ""  # MIME type
 
     status: str = Field(default="submitted")  # submitted | under_review | approved | rejected
 
