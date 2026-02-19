@@ -7,6 +7,7 @@ import { useAuthContext } from "@/components/auth/AuthProvider";
 const ADMIN_LINKS = [
   { href: "/admin/users", label: "Users" },
   { href: "/admin/kyc-review", label: "KYC Review" },
+  { href: "/admin/bank-review", label: "Bank Review" },
   { href: "/admin/transactions", label: "Transactions" },
   { href: "/admin/fees", label: "Fees" },
   { href: "/admin/aml", label: "AML Flags" },

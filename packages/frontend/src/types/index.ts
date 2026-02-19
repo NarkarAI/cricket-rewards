@@ -11,6 +11,10 @@ export interface User {
   is_verified_player: boolean;
   geo: GeoInfo;
   kyc_status: string;
+  kyc_profile?: KycProfile;
+  pan_verified?: boolean;
+  bank_verified?: boolean;
+  kyc_completed?: boolean;
 }
 
 export interface GeoInfo {
@@ -100,4 +104,43 @@ export interface KycDocument {
   content_type: string;
   status: string;
   created_at: string;
+}
+
+export interface KycProfile {
+  country: string;
+  full_name: string;
+  date_of_birth: string;
+  address_line1: string;
+  address_line2: string;
+  city: string;
+  state: string;
+  postal_code: string;
+  pan_number?: string;
+  aadhaar_last4?: string;
+  ssn_last4?: string;
+  gov_id_type?: string;
+}
+
+export interface BankAccount {
+  id: string;
+  country: string;
+  account_holder_name: string;
+  account_number_last4: string;
+  ifsc_code?: string;
+  upi_id?: string;
+  routing_number?: string;
+  account_type?: string;
+  status: string;
+  verification_method: string;
+  created_at: string;
+}
+
+export interface KycFullStatus {
+  kyc_status: string;
+  kyc_profile: KycProfile | null;
+  documents: KycDocument[];
+  bank_account: BankAccount | null;
+  pan_verified: boolean;
+  bank_verified: boolean;
+  kyc_completed: boolean;
 }

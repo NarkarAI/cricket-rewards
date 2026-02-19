@@ -4,7 +4,14 @@ from fastapi.responses import FileResponse
 from app.auth.dependencies import get_current_user, require_player, require_admin
 from app.models.kyc_document import KycDocument
 from app.models.user import User
-from app.schemas.kyc import KycStatusResponse, KycUploadResponse
+from app.schemas.kyc import (
+    BankAccountResponse,
+    BankAccountSubmit,
+    KycProfileSubmit,
+    KycProfileResponse,
+    KycStatusResponse,
+    KycUploadResponse,
+)
 from app.services import kyc_service
 
 router = APIRouter(prefix="/api/v1/kyc", tags=["kyc"])
@@ -98,3 +105,74 @@ async def get_document_file(doc_id: str, user: User = Depends(get_current_user))
         media_type=doc.content_type or "application/octet-stream",
         filename=doc.file_name,
     )
+
+
+# --- Country-specific KYC ---
+
+
+@router.post("/profile")
+async def submit_kyc_profile(
+    data: KycProfileSubmit,
+    user: User = Depends(require_player),
+):
+    try:
+        updated_user = await kyc_service.submit_kyc_profile(user.firebase_uid, data)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return {
+        "status": "saved",
+        "kyc_status": updated_user.kyc_status,
+        "country": data.country,
+    }
+
+
+@router.post("/bank", response_model=BankAccountResponse)
+async def submit_bank_account(
+    data: BankAccountSubmit,
+    user: User = Depends(require_player),
+):
+    try:
+        bank = await kyc_service.submit_bank_account(user.firebase_uid, data)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return BankAccountResponse(
+        id=str(bank.id),
+        country=bank.country,
+        account_holder_name=bank.account_holder_name,
+        account_number_last4=bank.account_number_last4,
+        ifsc_code=bank.ifsc_code,
+        upi_id=bank.upi_id,
+        routing_number=bank.routing_number,
+        account_type=bank.account_type,
+        status=bank.status,
+        verification_method=bank.verification_method,
+        created_at=bank.created_at,
+    )
+
+
+@router.get("/bank")
+async def get_bank_account(user: User = Depends(get_current_user)):
+    bank = await kyc_service.get_user_bank_account(user.firebase_uid)
+    if not bank:
+        return None
+    return BankAccountResponse(
+        id=str(bank.id),
+        country=bank.country,
+        account_holder_name=bank.account_holder_name,
+        account_number_last4=bank.account_number_last4,
+        ifsc_code=bank.ifsc_code,
+        upi_id=bank.upi_id,
+        routing_number=bank.routing_number,
+        account_type=bank.account_type,
+        status=bank.status,
+        verification_method=bank.verification_method,
+        created_at=bank.created_at,
+    )
+
+
+@router.get("/full-status")
+async def get_full_kyc_status(user: User = Depends(get_current_user)):
+    try:
+        return await kyc_service.get_full_kyc_status(user.firebase_uid)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))

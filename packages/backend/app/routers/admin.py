@@ -11,7 +11,7 @@ from app.models.user import User
 from app.models.wallet import Wallet
 from app.realtime.emitter import emitter
 from app.schemas.admin import AdminUserUpdate, AmlReviewRequest, FeeConfigRequest, FeeConfigResponse
-from app.schemas.kyc import KycReviewRequest
+from app.schemas.kyc import BankReviewRequest, KycReviewRequest
 from app.services import kyc_service, wallet_service
 from app.services.fee_engine import clear_cache as clear_fee_cache
 from app.utils.pagination import PaginatedResponse
@@ -139,6 +139,49 @@ async def review_kyc(
     await emitter.emit_kyc_status(doc.user_id, req.status)
 
     return {"status": "reviewed", "doc_id": doc_id, "new_status": req.status}
+
+
+# --- Bank Verification ---
+@router.get("/kyc/banks/pending")
+async def list_pending_banks(admin: User = Depends(require_admin)):
+    banks = await kyc_service.get_pending_bank_reviews()
+    items = []
+    for b in banks:
+        user = await User.find_one(User.firebase_uid == b.user_id)
+        items.append({
+            "id": str(b.id),
+            "user_id": b.user_id,
+            "user_email": user.email if user else "",
+            "user_name": user.display_name if user else "",
+            "country": b.country,
+            "account_holder_name": b.account_holder_name,
+            "account_number_last4": b.account_number_last4,
+            "ifsc_code": b.ifsc_code,
+            "routing_number": b.routing_number,
+            "account_type": b.account_type,
+            "upi_id": b.upi_id,
+            "status": b.status,
+            "created_at": b.created_at.isoformat(),
+        })
+    return items
+
+
+@router.patch("/kyc/banks/{bank_id}/verify")
+async def verify_bank(
+    bank_id: str,
+    req: BankReviewRequest,
+    admin: User = Depends(require_admin),
+):
+    try:
+        bank = await kyc_service.verify_bank_account(
+            bank_id=bank_id,
+            reviewer_id=str(admin.id),
+            status=req.status,
+            notes=req.review_notes,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return {"status": "reviewed", "bank_id": bank_id, "new_status": req.status}
 
 
 # --- Finance ---

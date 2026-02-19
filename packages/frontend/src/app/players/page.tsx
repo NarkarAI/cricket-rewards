@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { useAuthContext } from "@/components/auth/AuthProvider";
+import { PlayerVerificationBadges } from "@/components/ui/VerificationBadges";
 import type { Player, PaginatedResponse } from "@/types";
 
 export default function PlayersPage() {
@@ -234,13 +235,9 @@ export default function PlayersPage() {
                     {player.display_name?.[0] || "?"}
                   </div>
                   <div className="flex-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-semibold">{player.display_name}</h3>
-                      {player.is_verified_player ? (
-                        <span className="bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full text-[10px] font-medium">Verified</span>
-                      ) : (
-                        <span className="bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded-full text-[10px] font-medium">Pending KYC</span>
-                      )}
+                      <PlayerVerificationBadges user={player} compact />
                     </div>
                     <p className="text-sm text-gray-500">{player.team}</p>
                   </div>

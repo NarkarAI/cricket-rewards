@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import { useSocketContext } from "@/components/realtime/SocketProvider";
 import { api } from "@/lib/api";
+import { formatCurrency, getCurrencySymbol } from "@/lib/currency";
 import type { Wallet, LedgerEntry, PaginatedResponse } from "@/types";
 
 export default function WalletPage() {
@@ -65,25 +66,25 @@ export default function WalletPage() {
             <div className="bg-white p-4 sm:p-6 rounded-xl border">
               <p className="text-xs sm:text-sm text-gray-500">Available</p>
               <p className="text-lg sm:text-2xl font-bold text-green-600 truncate">
-                {wallet.currency} {wallet.available_balance}
+                {formatCurrency(wallet.available_balance, wallet.currency)}
               </p>
             </div>
             <div className="bg-white p-4 sm:p-6 rounded-xl border">
               <p className="text-xs sm:text-sm text-gray-500">Pending</p>
               <p className="text-lg sm:text-2xl font-bold text-yellow-600 truncate">
-                {wallet.currency} {wallet.pending_balance}
+                {formatCurrency(wallet.pending_balance, wallet.currency)}
               </p>
             </div>
             <div className="bg-white p-4 sm:p-6 rounded-xl border">
               <p className="text-xs sm:text-sm text-gray-500">Held</p>
               <p className="text-lg sm:text-2xl font-bold text-red-600 truncate">
-                {wallet.currency} {wallet.held_balance}
+                {formatCurrency(wallet.held_balance, wallet.currency)}
               </p>
             </div>
             <div className="bg-white p-4 sm:p-6 rounded-xl border">
               <p className="text-xs sm:text-sm text-gray-500">Lifetime Received</p>
               <p className="text-lg sm:text-2xl font-bold truncate">
-                {wallet.currency} {wallet.lifetime_received}
+                {formatCurrency(wallet.lifetime_received, wallet.currency)}
               </p>
             </div>
           </div>
@@ -93,7 +94,7 @@ export default function WalletPage() {
               <h2 className="text-lg font-bold mb-4">Withdraw Funds</h2>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-end">
                 <div className="flex-1">
-                  <label className="block text-sm text-gray-600 mb-1">Amount ({wallet.currency})</label>
+                  <label className="block text-sm text-gray-600 mb-1">Amount ({getCurrencySymbol(wallet.currency)})</label>
                   <input
                     type="number"
                     min="0"
@@ -140,10 +141,10 @@ export default function WalletPage() {
                   </div>
                   <div className="text-right">
                     <p className={`font-bold ${entry.direction === "credit" ? "text-green-600" : "text-red-600"}`}>
-                      {entry.direction === "credit" ? "+" : "-"}{entry.currency} {entry.amount}
+                      {entry.direction === "credit" ? "+" : "-"}{formatCurrency(entry.amount, entry.currency)}
                     </p>
                     <p className="text-xs text-gray-500">
-                      Balance: {entry.currency} {entry.balance_after}
+                      Balance: {formatCurrency(entry.balance_after, entry.currency)}
                     </p>
                   </div>
                 </div>

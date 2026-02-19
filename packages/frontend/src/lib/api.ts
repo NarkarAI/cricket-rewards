@@ -71,7 +71,13 @@ export const api = {
 
   // KYC
   getKycStatus: () => request<any>("/api/v1/kyc/status"),
+  getKycFullStatus: () => request<any>("/api/v1/kyc/full-status"),
   submitKyc: () => request("/api/v1/kyc/submit", { method: "POST" }),
+  submitKycProfile: (data: any) =>
+    request("/api/v1/kyc/profile", { method: "POST", body: JSON.stringify(data) }),
+  submitBankAccount: (data: any) =>
+    request("/api/v1/kyc/bank", { method: "POST", body: JSON.stringify(data) }),
+  getBankAccount: () => request<any>("/api/v1/kyc/bank"),
   uploadKycDocument: async (documentType: string, file: File) => {
     const token = await getIdToken();
     const formData = new FormData();
@@ -82,7 +88,10 @@ export const api = {
       headers: { Authorization: `Bearer ${token}` },
       body: formData,
     });
-    if (!res.ok) throw new Error("Upload failed");
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({ detail: "Upload failed" }));
+      throw new Error(data.detail || "Upload failed");
+    }
     return res.json();
   },
 
@@ -101,6 +110,9 @@ export const api = {
     listFees: () => request<any>("/api/v1/admin/fees"),
     createFee: (data: any) =>
       request("/api/v1/admin/fees", { method: "POST", body: JSON.stringify(data) }),
+    getPendingBanks: () => request<any>("/api/v1/admin/kyc/banks/pending"),
+    verifyBank: (id: string, data: any) =>
+      request(`/api/v1/admin/kyc/banks/${id}/verify`, { method: "PATCH", body: JSON.stringify(data) }),
     getAmlFlagged: () => request<any>("/api/v1/admin/aml/flagged"),
     reviewAml: (userId: string, data: any) =>
       request(`/api/v1/admin/aml/${userId}/review`, {

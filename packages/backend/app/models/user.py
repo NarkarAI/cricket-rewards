@@ -11,6 +11,23 @@ class GeoInfo(BaseModel):
     detected_ip: str = ""
 
 
+class KycProfile(BaseModel):
+    country: str = ""  # "IN" or "US"
+    full_name: str = ""
+    date_of_birth: str = ""  # YYYY-MM-DD
+    address_line1: str = ""
+    address_line2: str = ""
+    city: str = ""
+    state: str = ""
+    postal_code: str = ""
+    # India-specific
+    pan_number: str = ""  # ABCDE1234F
+    aadhaar_last4: str = ""  # last 4 digits only
+    # USA-specific
+    ssn_last4: str = ""  # last 4 digits only
+    gov_id_type: str = ""  # drivers_license | passport
+
+
 class User(Document):
     firebase_uid: Indexed(str, unique=True)
     email: EmailStr
@@ -27,6 +44,12 @@ class User(Document):
 
     geo: GeoInfo = Field(default_factory=GeoInfo)
     kyc_status: str = Field(default="not_started")  # not_started | pending | approved | rejected
+    kyc_profile: Optional[KycProfile] = None
+
+    # Verification flags
+    pan_verified: bool = False
+    bank_verified: bool = False
+    kyc_completed: bool = False
 
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
