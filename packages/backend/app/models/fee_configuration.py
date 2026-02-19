@@ -5,11 +5,13 @@ from typing import Optional
 from beanie import Document
 from pydantic import Field
 
+from app.utils.decimal_type import DecimalField
+
 
 class FeeConfiguration(Document):
-    rate: Decimal = Decimal("0.05")
-    min_fee: Decimal = Decimal("0.01")
-    max_fee: Decimal = Decimal("500.00")
+    rate: DecimalField = Decimal("0.05")
+    min_fee: DecimalField = Decimal("0.01")
+    max_fee: DecimalField = Decimal("500.00")
     currency: str = "USD"
 
     is_active: bool = True

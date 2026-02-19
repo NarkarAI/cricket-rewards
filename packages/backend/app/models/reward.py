@@ -5,6 +5,8 @@ from uuid import uuid4
 from beanie import Document, Indexed
 from pydantic import BaseModel, Field
 
+from app.utils.decimal_type import DecimalField
+
 
 class StatusHistoryEntry(BaseModel):
     status: str
@@ -19,10 +21,10 @@ class Reward(Document):
     sender_id: Indexed(str)
     receiver_id: Indexed(str)
 
-    gross_amount: Decimal
-    fee_amount: Decimal = Decimal("0.00")
-    net_amount: Decimal = Decimal("0.00")
-    fee_rate: Decimal = Decimal("0.05")
+    gross_amount: DecimalField
+    fee_amount: DecimalField = Decimal("0.00")
+    net_amount: DecimalField = Decimal("0.00")
+    fee_rate: DecimalField = Decimal("0.05")
     currency: str
 
     message: str = ""

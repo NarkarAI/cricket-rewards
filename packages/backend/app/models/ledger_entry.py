@@ -5,6 +5,8 @@ from uuid import uuid4
 from beanie import Document, Indexed
 from pydantic import Field
 
+from app.utils.decimal_type import DecimalField
+
 
 class LedgerEntry(Document):
     entry_id: Indexed(str, unique=True) = Field(default_factory=lambda: str(uuid4()))
@@ -15,9 +17,9 @@ class LedgerEntry(Document):
     entry_type: str  # reward_received | reward_sent | platform_fee | withdrawal | refund | adjustment
     direction: str  # credit | debit
 
-    amount: Decimal
+    amount: DecimalField
     currency: str
-    balance_after: Decimal
+    balance_after: DecimalField
 
     related_entry_ids: list[str] = Field(default_factory=list)
     description: str = ""
