@@ -3,6 +3,8 @@ from decimal import Decimal
 
 import redis.asyncio as redis
 
+from beanie.operators import In
+
 from app.config import settings
 from app.models.reward import Reward
 from app.models.user import User
@@ -67,7 +69,7 @@ async def check_velocity(user_id: str, amount: Decimal, currency: str) -> list[s
     daily_rewards = await Reward.find(
         Reward.sender_id == user_id,
         Reward.created_at >= day_ago,
-        Reward.status.is_in(["completed", "payment_confirmed", "payment_pending"]),
+        In(Reward.status, ["completed", "payment_confirmed", "payment_pending"]),
     ).to_list()
 
     daily_total = sum(r.gross_amount for r in daily_rewards) + amount
