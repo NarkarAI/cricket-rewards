@@ -41,7 +41,8 @@ class User(Document):
     teams: list[str] = []
     bio: str = ""
     nationality: str = ""  # ISO 3166-1 alpha-2, e.g. "IN", "AU"
-    profile_background: str = ""  # theme key, e.g. "flag", "gradient-blue", "dark"
+    profile_background: str = ""  # theme key, hex color, or "custom"
+    banner_url: str = ""  # uploaded banner image path
     is_verified_player: bool = False
 
     @model_validator(mode="before")

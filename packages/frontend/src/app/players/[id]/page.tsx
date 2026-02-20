@@ -34,7 +34,7 @@ export default function PlayerProfilePage() {
   if (loading) return <div className="max-w-4xl mx-auto px-4 py-8">Loading...</div>;
   if (!player) return <div className="max-w-4xl mx-auto px-4 py-8">Player not found.</div>;
 
-  const bannerBg = getBackgroundStyle(player.profile_background, player.nationality);
+  const bannerBg = getBackgroundStyle(player.profile_background, player.nationality, player.banner_url);
   const flag = countryCodeToFlag(player.nationality);
 
   return (

@@ -85,6 +85,7 @@ async def get_me(user: User = Depends(get_current_user)):
         "bio": user.bio,
         "nationality": user.nationality,
         "profile_background": user.profile_background,
+        "banner_url": user.banner_url,
         "is_verified_player": user.is_verified_player,
         "geo": {
             "country_code": user.geo.country_code,

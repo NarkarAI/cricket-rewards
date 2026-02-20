@@ -12,6 +12,7 @@ class PlayerSummary(BaseModel):
     bio: str
     nationality: str = ""
     profile_background: str = ""
+    banner_url: str = ""
     is_verified_player: bool = False
     kyc_status: str = "not_started"
     total_rewards_received: int = 0

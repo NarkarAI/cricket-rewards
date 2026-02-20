@@ -56,6 +56,21 @@ export const api = {
     }
     return res.json();
   },
+  uploadBanner: async (file: File) => {
+    const token = await getIdToken();
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch(`${API_URL}/api/v1/users/me/banner`, {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({ detail: "Upload failed" }));
+      throw new Error(data.detail || "Upload failed");
+    }
+    return res.json();
+  },
 
   // Players
   listPlayers: (page = 1, search = "") =>

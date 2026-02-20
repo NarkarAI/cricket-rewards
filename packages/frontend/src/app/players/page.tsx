@@ -262,7 +262,7 @@ export default function PlayersPage() {
                 {/* Accent strip at top */}
                 <div
                   className="h-2 w-full"
-                  style={{ background: getBackgroundStyle(player.profile_background, player.nationality) }}
+                  style={{ background: getBackgroundStyle(player.profile_background, player.nationality, player.banner_url) }}
                 />
                 <div className="p-6 pt-4">
                   <div className="flex items-center gap-4 mb-3">

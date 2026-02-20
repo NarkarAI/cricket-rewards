@@ -1,3 +1,4 @@
+import re
 from typing import Optional
 
 from pydantic import BaseModel, field_validator
@@ -21,15 +22,18 @@ class UserResponse(BaseModel):
     bio: str
     nationality: str
     profile_background: str
+    banner_url: str
     is_verified_player: bool
     geo: GeoResponse
     kyc_status: str
 
 
-ALLOWED_BACKGROUNDS = {
+ALLOWED_THEME_KEYS = {
     "", "flag", "gradient-blue", "gradient-gold", "gradient-green",
-    "gradient-purple", "dark", "sunset", "ocean",
+    "gradient-purple", "dark", "sunset", "ocean", "custom",
 }
+
+HEX_COLOR_RE = re.compile(r"^#[0-9A-Fa-f]{6}$")
 
 
 class UserUpdateRequest(BaseModel):
@@ -40,6 +44,7 @@ class UserUpdateRequest(BaseModel):
     teams: Optional[list[str]] = None
     nationality: Optional[str] = None
     profile_background: Optional[str] = None
+    banner_url: Optional[str] = None
 
     @field_validator("teams")
     @classmethod
@@ -62,8 +67,12 @@ class UserUpdateRequest(BaseModel):
     @field_validator("profile_background")
     @classmethod
     def validate_profile_background(cls, v):
-        if v is not None and v not in ALLOWED_BACKGROUNDS:
-            raise ValueError(f"Invalid background theme: {v}")
+        if v is not None:
+            if v in ALLOWED_THEME_KEYS:
+                return v
+            if HEX_COLOR_RE.match(v):
+                return v
+            raise ValueError(f"Invalid background: must be a theme key or hex color")
         return v
 
 

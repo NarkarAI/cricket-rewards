@@ -48,6 +48,7 @@ async def list_players(
                 bio=u.bio,
                 nationality=u.nationality,
                 profile_background=u.profile_background,
+                banner_url=u.banner_url,
                 is_verified_player=u.is_verified_player,
                 kyc_status=u.kyc_status,
                 total_rewards_received=reward_count,

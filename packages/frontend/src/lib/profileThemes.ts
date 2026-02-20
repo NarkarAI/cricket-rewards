@@ -82,18 +82,18 @@ export const BACKGROUND_THEMES: BackgroundTheme[] = [
 // Default gradient when nothing is set
 const DEFAULT_BG = "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
 
-export function getBackgroundStyle(theme: string, nationality: string): string {
+export function getBackgroundStyle(theme: string, nationality: string, bannerUrl?: string): string {
   if (!theme) return DEFAULT_BG;
+  if (theme === "custom" && bannerUrl) {
+    return `url(${bannerUrl}) center/cover no-repeat`;
+  }
   if (theme === "flag") {
     return FLAG_GRADIENTS[nationality?.toUpperCase()] || DEFAULT_BG;
   }
+  // Hex color
+  if (theme.startsWith("#")) {
+    return theme;
+  }
   const found = BACKGROUND_THEMES.find((t) => t.key === theme);
   return found?.style || DEFAULT_BG;
-}
-
-// Whether text on this background should be white
-export function isLightText(theme: string): boolean {
-  if (!theme) return true;
-  // Most gradients need white text; flag depends on country but white with shadow works universally
-  return true;
 }

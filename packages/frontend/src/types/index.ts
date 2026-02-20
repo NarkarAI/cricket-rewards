@@ -10,6 +10,7 @@ export interface User {
   bio: string;
   nationality: string;
   profile_background: string;
+  banner_url: string;
   is_verified_player: boolean;
   geo: GeoInfo;
   kyc_status: string;
@@ -34,6 +35,7 @@ export interface Player {
   bio: string;
   nationality: string;
   profile_background: string;
+  banner_url: string;
   is_verified_player: boolean;
   kyc_status: string;
   total_rewards_received: number;

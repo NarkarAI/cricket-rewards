@@ -29,6 +29,7 @@ def _user_response(user: User) -> UserResponse:
         bio=user.bio,
         nationality=user.nationality,
         profile_background=user.profile_background,
+        banner_url=user.banner_url,
         is_verified_player=user.is_verified_player,
         geo=GeoResponse(
             country_code=user.geo.country_code,
@@ -131,6 +132,54 @@ async def get_avatar(filename: str):
     file_path = Path(settings.avatar_upload_dir) / filename
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="Avatar not found")
+    return FileResponse(path=str(file_path))
+
+
+BANNER_ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp"}
+
+
+@router.post("/me/banner")
+async def upload_banner(
+    file: UploadFile = File(...),
+    user: User = Depends(get_current_user),
+):
+    """Upload a profile banner image."""
+    if file.content_type not in BANNER_ALLOWED_TYPES:
+        raise HTTPException(status_code=400, detail="Only JPEG, PNG, and WebP images are allowed")
+
+    contents = await file.read()
+    if len(contents) > settings.banner_max_file_size:
+        raise HTTPException(status_code=400, detail="File too large (max 5MB)")
+
+    ext = os.path.splitext(file.filename or "banner")[1] or ".jpg"
+    filename = f"banner_{user.id}_{uuid.uuid4().hex[:8]}{ext}"
+
+    banner_dir = Path(settings.banner_upload_dir)
+    banner_dir.mkdir(parents=True, exist_ok=True)
+
+    # Remove old banner file if exists
+    if user.banner_url:
+        old_file = banner_dir / user.banner_url.split("/")[-1]
+        if old_file.exists():
+            old_file.unlink()
+
+    file_path = banner_dir / filename
+    file_path.write_bytes(contents)
+
+    user.banner_url = f"/api/v1/users/banners/{filename}"
+    user.profile_background = "custom"
+    user.updated_at = datetime.utcnow()
+    await user.save()
+
+    return {"banner_url": user.banner_url}
+
+
+@router.get("/banners/{filename}")
+async def get_banner(filename: str):
+    """Serve banner image (public, no auth required)."""
+    file_path = Path(settings.banner_upload_dir) / filename
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Banner not found")
     return FileResponse(path=str(file_path))
 
 

@@ -48,6 +48,7 @@ services:
       - ./firebase-service-account.json:/app/firebase-service-account.json:ro
       - kyc_uploads:/app/uploads/kyc
       - avatar_uploads:/app/uploads/avatars
+      - banner_uploads:/app/uploads/banners
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   frontend:
@@ -86,3 +87,4 @@ volumes:
   redis_data:
   kyc_uploads:
   avatar_uploads:
+  banner_uploads:
