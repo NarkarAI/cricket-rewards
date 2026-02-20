@@ -8,7 +8,7 @@ class PlayerSummary(BaseModel):
     display_name: str
     avatar_url: str
     sport: str
-    team: str
+    teams: list[str]
     bio: str
     is_verified_player: bool = False
     kyc_status: str = "not_started"

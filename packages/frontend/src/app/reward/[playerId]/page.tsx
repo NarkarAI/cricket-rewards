@@ -71,7 +71,7 @@ export default function RewardPage() {
       <h1 className="text-2xl font-bold mb-2">Send Reward</h1>
       {player && (
         <p className="text-gray-600 mb-6">
-          To: <span className="font-semibold">{player.display_name}</span> ({player.team})
+          To: <span className="font-semibold">{player.display_name}</span> ({player.teams?.join(", ") || "No team"})
         </p>
       )}
 

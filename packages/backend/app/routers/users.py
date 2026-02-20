@@ -20,7 +20,7 @@ def _user_response(user: User) -> UserResponse:
         avatar_url=user.avatar_url,
         role=user.role,
         sport=user.sport,
-        team=user.team,
+        teams=user.teams,
         bio=user.bio,
         is_verified_player=user.is_verified_player,
         geo=GeoResponse(
@@ -69,8 +69,8 @@ async def become_player(req: UserUpdateRequest, user: User = Depends(get_current
         user.display_name = req.display_name
     if req.sport:
         user.sport = req.sport
-    if req.team:
-        user.team = req.team
+    if req.teams is not None:
+        user.teams = req.teams
     if req.bio:
         user.bio = req.bio
 

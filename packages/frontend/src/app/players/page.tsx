@@ -21,7 +21,7 @@ export default function PlayersPage() {
   const [formData, setFormData] = useState({
     display_name: "",
     sport: "Cricket",
-    team: "",
+    teams: [""],
     bio: "",
   });
   const [submitting, setSubmitting] = useState(false);
@@ -51,13 +51,14 @@ export default function PlayersPage() {
   const handleBecomePlayer = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError("");
-    if (!formData.display_name.trim() || !formData.team.trim()) {
-      setFormError("Name and team are required.");
+    const validTeams = formData.teams.filter(t => t.trim());
+    if (!formData.display_name.trim() || validTeams.length === 0) {
+      setFormError("Name and at least one team are required.");
       return;
     }
     setSubmitting(true);
     try {
-      await api.becomePlayer(formData);
+      await api.becomePlayer({ ...formData, teams: validTeams });
       await refreshUser();
       setShowForm(false);
       // Refresh players list
@@ -175,15 +176,42 @@ export default function PlayersPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Team *</label>
-                <input
-                  type="text"
-                  value={formData.team}
-                  onChange={(e) => setFormData({ ...formData, team: e.target.value })}
-                  className="w-full border rounded-lg px-3 py-2"
-                  placeholder="e.g., Mumbai Indians"
-                  required
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Team(s) *</label>
+                {formData.teams.map((team, idx) => (
+                  <div key={idx} className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={team}
+                      onChange={(e) => {
+                        const updated = [...formData.teams];
+                        updated[idx] = e.target.value;
+                        setFormData({ ...formData, teams: updated });
+                      }}
+                      className="flex-1 border rounded-lg px-3 py-2"
+                      placeholder="e.g., Mumbai Indians"
+                      required={idx === 0}
+                    />
+                    {formData.teams.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = formData.teams.filter((_, i) => i !== idx);
+                          setFormData({ ...formData, teams: updated });
+                        }}
+                        className="text-red-500 text-sm px-2"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, teams: [...formData.teams, ""] })}
+                  className="text-primary text-sm hover:underline"
+                >
+                  + Add another team
+                </button>
               </div>
             </div>
             <div>
@@ -239,7 +267,13 @@ export default function PlayersPage() {
                       <h3 className="font-semibold">{player.display_name}</h3>
                       <PlayerVerificationBadges user={player} compact />
                     </div>
-                    <p className="text-sm text-gray-500">{player.team}</p>
+                    <div className="flex flex-wrap gap-1">
+                      {player.teams?.length > 0 ? player.teams.map((t: string, i: number) => (
+                        <span key={i} className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">{t}</span>
+                      )) : (
+                        <span className="text-sm text-gray-400">No team</span>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <p className="text-sm text-gray-600 mb-2">{player.sport}</p>

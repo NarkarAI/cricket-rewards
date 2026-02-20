@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 
 class GeoResponse(BaseModel):
@@ -17,7 +17,7 @@ class UserResponse(BaseModel):
     avatar_url: str
     role: str
     sport: str
-    team: str
+    teams: list[str]
     bio: str
     is_verified_player: bool
     geo: GeoResponse
@@ -29,7 +29,16 @@ class UserUpdateRequest(BaseModel):
     avatar_url: Optional[str] = None
     bio: Optional[str] = None
     sport: Optional[str] = None
-    team: Optional[str] = None
+    teams: Optional[list[str]] = None
+
+    @field_validator("teams")
+    @classmethod
+    def validate_teams(cls, v):
+        if v is not None:
+            v = [t.strip() for t in v if t.strip()]
+            if len(v) > 10:
+                raise ValueError("Maximum 10 teams allowed")
+        return v
 
 
 class AdminUserUpdateRequest(BaseModel):

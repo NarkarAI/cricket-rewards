@@ -42,9 +42,14 @@ export default function PlayerProfilePage() {
           </div>
           <div>
             <h1 className="text-3xl font-bold">{player.display_name}</h1>
-            <p className="text-gray-500">
-              {player.sport} &middot; {player.team}
-            </p>
+            <p className="text-gray-500">{player.sport}</p>
+            <div className="flex flex-wrap gap-1 mt-1">
+              {player.teams?.length > 0 ? player.teams.map((t, i) => (
+                <span key={i} className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">{t}</span>
+              )) : (
+                <span className="text-xs text-gray-400">No team listed</span>
+              )}
+            </div>
             {player.is_verified_player && (
               <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded mt-1 inline-block">
                 Verified Player

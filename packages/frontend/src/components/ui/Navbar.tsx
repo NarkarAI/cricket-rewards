@@ -55,6 +55,9 @@ export function Navbar() {
                 <Link href="/rewards" className="text-gray-600 hover:text-gray-900 text-sm">
                   Rewards
                 </Link>
+                <Link href="/profile" className="text-gray-600 hover:text-gray-900 text-sm">
+                  Profile
+                </Link>
                 {user.role === "player" && (
                   <Link href="/kyc" className="text-gray-600 hover:text-gray-900 text-sm">
                     KYC

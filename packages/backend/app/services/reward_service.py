@@ -195,7 +195,7 @@ async def LedgerEntry_update_related(entry_id: str, related_ids: list[str]):
     """Update related entry IDs on a ledger entry (append-only safe: only adds links)."""
     from app.models.ledger_entry import LedgerEntry
 
-    await LedgerEntry.get_motor_collection().update_one(
+    await LedgerEntry.get_pymongo_collection().update_one(
         {"entry_id": entry_id},
         {"$set": {"related_entry_ids": related_ids}},
     )

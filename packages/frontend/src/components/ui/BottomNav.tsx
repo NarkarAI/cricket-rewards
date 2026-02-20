@@ -105,6 +105,13 @@ export function BottomNav() {
                 <p className="text-sm font-medium truncate">{user.display_name || user.email}</p>
                 <p className="text-xs text-gray-500 capitalize">{user.role}</p>
               </div>
+              <Link href="/profile" onClick={() => setMoreOpen(false)}
+                className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-50 text-gray-700">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                Edit Profile
+              </Link>
               <Link href="/rewards" onClick={() => setMoreOpen(false)}
                 className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-gray-50 text-gray-700">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>

@@ -22,7 +22,7 @@ async def credit_available(user_id: str, amount: Decimal, currency: str = "USD")
         wallet = await get_or_create_wallet(user_id, currency)
         current_version = wallet.version
 
-        result = await Wallet.get_motor_collection().update_one(
+        result = await Wallet.get_pymongo_collection().update_one(
             {"user_id": user_id, "version": current_version},
             {
                 "$inc": {
@@ -49,7 +49,7 @@ async def credit_pending(user_id: str, amount: Decimal, currency: str = "USD") -
         wallet = await get_or_create_wallet(user_id, currency)
         current_version = wallet.version
 
-        result = await Wallet.get_motor_collection().update_one(
+        result = await Wallet.get_pymongo_collection().update_one(
             {"user_id": user_id, "version": current_version},
             {
                 "$inc": {
@@ -78,7 +78,7 @@ async def release_pending_to_available(user_id: str, amount: Decimal) -> Wallet:
 
         current_version = wallet.version
 
-        result = await Wallet.get_motor_collection().update_one(
+        result = await Wallet.get_pymongo_collection().update_one(
             {"user_id": user_id, "version": current_version},
             {
                 "$inc": {
@@ -108,7 +108,7 @@ async def debit_available(user_id: str, amount: Decimal) -> Wallet:
 
         current_version = wallet.version
 
-        result = await Wallet.get_motor_collection().update_one(
+        result = await Wallet.get_pymongo_collection().update_one(
             {"user_id": user_id, "version": current_version},
             {
                 "$inc": {
@@ -131,7 +131,7 @@ async def debit_available(user_id: str, amount: Decimal) -> Wallet:
 
 async def record_fee(user_id: str, fee_amount: Decimal) -> None:
     """Record fees paid (tracking only, fees are deducted from gross before credit)."""
-    await Wallet.get_motor_collection().update_one(
+    await Wallet.get_pymongo_collection().update_one(
         {"user_id": user_id},
         {"$inc": {"lifetime_fees_paid": float(fee_amount)}},
     )

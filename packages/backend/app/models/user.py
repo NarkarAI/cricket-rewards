@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 from beanie import Document, Indexed
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, model_validator
 
 
 class GeoInfo(BaseModel):
@@ -38,9 +38,21 @@ class User(Document):
 
     # Player-specific fields
     sport: str = ""
-    team: str = ""
+    teams: list[str] = []
     bio: str = ""
     is_verified_player: bool = False
+
+    @model_validator(mode="before")
+    @classmethod
+    def _migrate_team_to_teams(cls, values):
+        """Backward compat: convert old `team` string to `teams` list."""
+        if isinstance(values, dict):
+            old_team = values.pop("team", None)
+            if old_team and "teams" not in values:
+                values["teams"] = [old_team] if old_team else []
+            if "teams" not in values:
+                values["teams"] = []
+        return values
 
     geo: GeoInfo = Field(default_factory=GeoInfo)
     kyc_status: str = Field(default="not_started")  # not_started | pending | approved | rejected

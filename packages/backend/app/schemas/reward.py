@@ -1,8 +1,14 @@
 from datetime import datetime
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_serializer
+
+TWO_PLACES = Decimal("0.01")
+
+
+def _round2(v: Decimal) -> str:
+    return str(v.quantize(TWO_PLACES, rounding=ROUND_HALF_UP))
 
 
 class CreateRewardRequest(BaseModel):
@@ -35,6 +41,14 @@ class RewardResponse(BaseModel):
     razorpay_order_id: Optional[str] = None
     razorpay_key_id: Optional[str] = None
 
+    @model_serializer(mode="wrap")
+    def _round_decimals(self, handler):
+        data = handler(self)
+        for key in ("gross_amount", "fee_amount", "net_amount"):
+            if key in data and data[key] is not None:
+                data[key] = _round2(Decimal(str(data[key])))
+        return data
+
 
 class RewardSummary(BaseModel):
     id: str
@@ -47,3 +61,11 @@ class RewardSummary(BaseModel):
     message: str
     status: str
     created_at: datetime
+
+    @model_serializer(mode="wrap")
+    def _round_decimals(self, handler):
+        data = handler(self)
+        for key in ("gross_amount", "net_amount"):
+            if key in data and data[key] is not None:
+                data[key] = _round2(Decimal(str(data[key])))
+        return data

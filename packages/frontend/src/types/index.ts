@@ -6,7 +6,7 @@ export interface User {
   avatar_url: string;
   role: "spectator" | "player" | "admin";
   sport: string;
-  team: string;
+  teams: string[];
   bio: string;
   is_verified_player: boolean;
   geo: GeoInfo;
@@ -28,7 +28,7 @@ export interface Player {
   display_name: string;
   avatar_url: string;
   sport: string;
-  team: string;
+  teams: string[];
   bio: string;
   is_verified_player: boolean;
   kyc_status: string;

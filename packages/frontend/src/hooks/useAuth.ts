@@ -25,8 +25,21 @@ export function useAuth() {
         try {
           const token = await fbUser.getIdToken();
           setAuthCookie(token);
-          const me = await api.getMe();
-          setUser(me);
+          try {
+            const me = await api.getMe();
+            setUser(me);
+          } catch {
+            // User exists in Firebase but not backend (e.g. new Google sign-in)
+            // Auto-register them
+            try {
+              await api.register(token, fbUser.displayName || "");
+              const me = await api.getMe();
+              setUser(me);
+            } catch {
+              setUser(null);
+              setAuthCookie(null);
+            }
+          }
         } catch {
           setUser(null);
           setAuthCookie(null);

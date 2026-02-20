@@ -3,7 +3,8 @@
 import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { loginWithEmail, loginWithGoogle, handleGoogleRedirectResult } from "@/lib/firebase";
+import { loginWithEmail, loginWithGoogle } from "@/lib/firebase";
+import { useAuthContext } from "@/components/auth/AuthProvider";
 import { api } from "@/lib/api";
 
 function LoginForm() {
@@ -15,17 +16,14 @@ function LoginForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Handle Google redirect result (mobile flow)
+  const { user: authUser, loading: authLoading } = useAuthContext();
+
+  // Redirect if already authenticated (e.g. after Google sign-in)
   useEffect(() => {
-    handleGoogleRedirectResult().then(async (result) => {
-      if (result?.user) {
-        const token = await result.user.getIdToken();
-        document.cookie = `firebase-auth-token=${token}; path=/; max-age=3600; SameSite=Lax`;
-        await ensureBackendUser(token, result.user.displayName || "");
-        router.push(redirect);
-      }
-    });
-  }, []);
+    if (!authLoading && authUser) {
+      router.push(redirect);
+    }
+  }, [authUser, authLoading, redirect, router]);
 
   const ensureBackendUser = async (firebaseToken: string, displayName: string) => {
     try {
@@ -61,9 +59,7 @@ function LoginForm() {
       await ensureBackendUser(token, cred.user.displayName || "");
       router.push(redirect);
     } catch (err: any) {
-      if (err.message !== "Redirecting...") {
-        setError(err.message);
-      }
+      setError(err.message);
     }
     setLoading(false);
   };

@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { registerWithEmail, loginWithGoogle, handleGoogleRedirectResult } from "@/lib/firebase";
+import { registerWithEmail, loginWithGoogle } from "@/lib/firebase";
+import { useAuthContext } from "@/components/auth/AuthProvider";
 import { api } from "@/lib/api";
 
 export default function RegisterPage() {
@@ -14,17 +15,14 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Handle Google redirect result (mobile flow)
+  const { user: authUser, loading: authLoading } = useAuthContext();
+
+  // Redirect if already authenticated (e.g. after Google sign-in)
   useEffect(() => {
-    handleGoogleRedirectResult().then(async (result) => {
-      if (result?.user) {
-        const token = await result.user.getIdToken();
-        document.cookie = `firebase-auth-token=${token}; path=/; max-age=3600; SameSite=Lax`;
-        await api.register(token, result.user.displayName || "");
-        router.push("/dashboard");
-      }
-    });
-  }, []);
+    if (!authLoading && authUser) {
+      router.push("/dashboard");
+    }
+  }, [authUser, authLoading, router]);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,9 +50,7 @@ export default function RegisterPage() {
       await api.register(token, cred.user.displayName || "");
       router.push("/dashboard");
     } catch (err: any) {
-      if (err.message !== "Redirecting...") {
-        setError(err.message);
-      }
+      setError(err.message);
     }
     setLoading(false);
   };

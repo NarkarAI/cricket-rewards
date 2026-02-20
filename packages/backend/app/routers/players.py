@@ -21,7 +21,7 @@ async def list_players(
         query_filter["$or"] = [
             {"display_name": {"$regex": search, "$options": "i"}},
             {"sport": {"$regex": search, "$options": "i"}},
-            {"team": {"$regex": search, "$options": "i"}},
+            {"teams": {"$regex": search, "$options": "i"}},
         ]
 
     total = await User.find(query_filter).count()
@@ -44,7 +44,7 @@ async def list_players(
                 display_name=u.display_name,
                 avatar_url=u.avatar_url,
                 sport=u.sport,
-                team=u.team,
+                teams=u.teams,
                 bio=u.bio,
                 is_verified_player=u.is_verified_player,
                 kyc_status=u.kyc_status,
@@ -70,7 +70,7 @@ async def get_player(player_id: str):
         display_name=user.display_name,
         avatar_url=user.avatar_url,
         sport=user.sport,
-        team=user.team,
+        teams=user.teams,
         bio=user.bio,
         is_verified_player=user.is_verified_player,
         kyc_status=user.kyc_status,
