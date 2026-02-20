@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import { PlayerVerificationBadges } from "@/components/ui/VerificationBadges";
+import { countryCodeToFlag, getBackgroundStyle } from "@/lib/profileThemes";
 import type { Player, PaginatedResponse } from "@/types";
 
 export default function PlayersPage() {
@@ -256,41 +257,53 @@ export default function PlayersPage() {
               <Link
                 key={player.id}
                 href={`/players/${player.id}`}
-                className="bg-white p-6 rounded-xl shadow-sm border hover:shadow-md transition"
+                className="bg-white rounded-xl shadow-sm border hover:shadow-md transition overflow-hidden"
               >
-                <div className="flex items-center gap-4 mb-3">
-                  {player.avatar_url ? (
-                    <img
-                      src={player.avatar_url}
-                      alt={player.display_name}
-                      className="w-12 h-12 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-lg">
-                      {player.display_name?.[0] || "?"}
-                    </div>
-                  )}
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-semibold">{player.display_name}</h3>
-                      <PlayerVerificationBadges user={player} compact />
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      {player.teams?.length > 0 ? player.teams.map((t: string, i: number) => (
-                        <span key={i} className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">{t}</span>
-                      )) : (
-                        <span className="text-sm text-gray-400">No team</span>
-                      )}
+                {/* Accent strip at top */}
+                <div
+                  className="h-2 w-full"
+                  style={{ background: getBackgroundStyle(player.profile_background, player.nationality) }}
+                />
+                <div className="p-6 pt-4">
+                  <div className="flex items-center gap-4 mb-3">
+                    {player.avatar_url ? (
+                      <img
+                        src={player.avatar_url}
+                        alt={player.display_name}
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-lg">
+                        {player.display_name?.[0] || "?"}
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="font-semibold">
+                          {player.nationality && (
+                            <span className="mr-1">{countryCodeToFlag(player.nationality)}</span>
+                          )}
+                          {player.display_name}
+                        </h3>
+                        <PlayerVerificationBadges user={player} compact />
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {player.teams?.length > 0 ? player.teams.map((t: string, i: number) => (
+                          <span key={i} className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">{t}</span>
+                        )) : (
+                          <span className="text-sm text-gray-400">No team</span>
+                        )}
+                      </div>
                     </div>
                   </div>
+                  <p className="text-sm text-gray-600 mb-2">{player.sport}</p>
+                  <p className="text-sm text-gray-500 line-clamp-2">{player.bio}</p>
+                  {player.is_verified_player && (
+                    <p className="text-sm text-primary mt-2">
+                      {player.total_rewards_received} rewards received
+                    </p>
+                  )}
                 </div>
-                <p className="text-sm text-gray-600 mb-2">{player.sport}</p>
-                <p className="text-sm text-gray-500 line-clamp-2">{player.bio}</p>
-                {player.is_verified_player && (
-                  <p className="text-sm text-primary mt-2">
-                    {player.total_rewards_received} rewards received
-                  </p>
-                )}
               </Link>
             ))}
           </div>

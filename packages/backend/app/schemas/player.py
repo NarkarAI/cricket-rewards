@@ -10,6 +10,8 @@ class PlayerSummary(BaseModel):
     sport: str
     teams: list[str]
     bio: str
+    nationality: str = ""
+    profile_background: str = ""
     is_verified_player: bool = False
     kyc_status: str = "not_started"
     total_rewards_received: int = 0

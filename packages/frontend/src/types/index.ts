@@ -8,6 +8,8 @@ export interface User {
   sport: string;
   teams: string[];
   bio: string;
+  nationality: string;
+  profile_background: string;
   is_verified_player: boolean;
   geo: GeoInfo;
   kyc_status: string;
@@ -30,6 +32,8 @@ export interface Player {
   sport: string;
   teams: string[];
   bio: string;
+  nationality: string;
+  profile_background: string;
   is_verified_player: boolean;
   kyc_status: string;
   total_rewards_received: number;

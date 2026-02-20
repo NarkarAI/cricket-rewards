@@ -27,6 +27,8 @@ def _user_response(user: User) -> UserResponse:
         sport=user.sport,
         teams=user.teams,
         bio=user.bio,
+        nationality=user.nationality,
+        profile_background=user.profile_background,
         is_verified_player=user.is_verified_player,
         geo=GeoResponse(
             country_code=user.geo.country_code,

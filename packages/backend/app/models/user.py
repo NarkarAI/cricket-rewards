@@ -40,6 +40,8 @@ class User(Document):
     sport: str = ""
     teams: list[str] = []
     bio: str = ""
+    nationality: str = ""  # ISO 3166-1 alpha-2, e.g. "IN", "AU"
+    profile_background: str = ""  # theme key, e.g. "flag", "gradient-blue", "dark"
     is_verified_player: bool = False
 
     @model_validator(mode="before")

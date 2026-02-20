@@ -5,6 +5,12 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { useAuthContext } from "@/components/auth/AuthProvider";
+import {
+  COUNTRIES,
+  BACKGROUND_THEMES,
+  countryCodeToFlag,
+  getBackgroundStyle,
+} from "@/lib/profileThemes";
 
 export default function ProfilePage() {
   const { user, loading, refreshUser } = useAuthContext();
@@ -15,6 +21,8 @@ export default function ProfilePage() {
     bio: "",
     sport: "Cricket",
     teams: [""],
+    nationality: "",
+    profile_background: "",
   });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -32,6 +40,8 @@ export default function ProfilePage() {
         bio: user.bio || "",
         sport: user.sport || "Cricket",
         teams: user.teams?.length > 0 ? [...user.teams] : [""],
+        nationality: user.nationality || "",
+        profile_background: user.profile_background || "",
       });
     }
   }, [user]);
@@ -82,6 +92,8 @@ export default function ProfilePage() {
         bio: formData.bio.trim(),
         sport: formData.sport,
         teams: validTeams,
+        nationality: formData.nationality,
+        profile_background: formData.profile_background,
       });
       await refreshUser();
       setMessage("Profile updated successfully.");
@@ -97,6 +109,10 @@ export default function ProfilePage() {
 
   const isPlayer = user.role === "player";
   const avatarSrc = user.avatar_url || "";
+  const previewBg = getBackgroundStyle(
+    formData.profile_background,
+    formData.nationality
+  );
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
@@ -113,139 +129,207 @@ export default function ProfilePage() {
         </div>
       )}
 
-      <div className="bg-white rounded-xl border p-6">
-        <div className="flex items-center gap-4 mb-6 pb-4 border-b">
-          <div className="relative group">
-            {avatarSrc ? (
-              <img
-                src={avatarSrc}
-                alt={user.display_name}
-                className="w-16 h-16 rounded-full object-cover"
+      <div className="bg-white rounded-xl border overflow-hidden">
+        {/* Profile Banner Preview */}
+        <div
+          className="h-32 relative"
+          style={{ background: previewBg }}
+        >
+          <div className="absolute -bottom-10 left-6">
+            <div className="relative group">
+              {avatarSrc ? (
+                <img
+                  src={avatarSrc}
+                  alt={user.display_name}
+                  className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-lg"
+                />
+              ) : (
+                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-primary font-bold text-2xl border-4 border-white shadow-lg">
+                  {user.display_name?.[0]?.toUpperCase() || "?"}
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+              >
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handleAvatarUpload}
+                className="hidden"
               />
-            ) : (
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-xl">
-                {user.display_name?.[0]?.toUpperCase() || "?"}
-              </div>
-            )}
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-            >
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={handleAvatarUpload}
-              className="hidden"
-            />
-          </div>
-          <div>
-            <p className="font-semibold text-lg">{user.display_name || user.email}</p>
-            <p className="text-sm text-gray-500 capitalize">{user.role}</p>
-            {uploading && <p className="text-xs text-primary">Uploading...</p>}
+            </div>
           </div>
         </div>
 
-        {!isPlayer ? (
-          <div className="text-center py-8">
-            <p className="text-gray-600 mb-4">Profile editing is available for players.</p>
-            <Link href="/players" className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark">
-              Become a Player
-            </Link>
+        <div className="pt-14 px-6 pb-6">
+          <div className="mb-4">
+            <p className="font-semibold text-lg">
+              {formData.nationality && (
+                <span className="mr-2">{countryCodeToFlag(formData.nationality)}</span>
+              )}
+              {user.display_name || user.email}
+            </p>
+            <p className="text-sm text-gray-500 capitalize">{user.role}</p>
+            {uploading && <p className="text-xs text-primary">Uploading...</p>}
           </div>
-        ) : (
-          <form onSubmit={handleSave} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Display Name</label>
-              <input
-                type="text"
-                value={formData.display_name}
-                onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
-                className="w-full border rounded-lg px-3 py-2"
-                required
-              />
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Sport</label>
-              <select
-                value={formData.sport}
-                onChange={(e) => setFormData({ ...formData, sport: e.target.value })}
-                className="w-full border rounded-lg px-3 py-2"
-              >
-                <option value="Cricket">Cricket</option>
-                <option value="Football">Football</option>
-                <option value="Basketball">Basketball</option>
-                <option value="Tennis">Tennis</option>
-                <option value="Other">Other</option>
-              </select>
+          {!isPlayer ? (
+            <div className="text-center py-8">
+              <p className="text-gray-600 mb-4">Profile editing is available for players.</p>
+              <Link href="/players" className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark">
+                Become a Player
+              </Link>
             </div>
+          ) : (
+            <form onSubmit={handleSave} className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Display Name</label>
+                <input
+                  type="text"
+                  value={formData.display_name}
+                  onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
+                  className="w-full border rounded-lg px-3 py-2"
+                  required
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Teams</label>
-              {formData.teams.map((team, idx) => (
-                <div key={idx} className="flex gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={team}
-                    onChange={(e) => {
-                      const updated = [...formData.teams];
-                      updated[idx] = e.target.value;
-                      setFormData({ ...formData, teams: updated });
-                    }}
-                    className="flex-1 border rounded-lg px-3 py-2"
-                    placeholder="e.g., Mumbai Indians"
-                  />
-                  {formData.teams.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const updated = formData.teams.filter((_, i) => i !== idx);
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Sport</label>
+                  <select
+                    value={formData.sport}
+                    onChange={(e) => setFormData({ ...formData, sport: e.target.value })}
+                    className="w-full border rounded-lg px-3 py-2"
+                  >
+                    <option value="Cricket">Cricket</option>
+                    <option value="Football">Football</option>
+                    <option value="Basketball">Basketball</option>
+                    <option value="Tennis">Tennis</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
+                  <select
+                    value={formData.nationality}
+                    onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
+                    className="w-full border rounded-lg px-3 py-2"
+                  >
+                    <option value="">Select country</option>
+                    {COUNTRIES.map((c) => (
+                      <option key={c.code} value={c.code}>
+                        {countryCodeToFlag(c.code)} {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Teams</label>
+                {formData.teams.map((team, idx) => (
+                  <div key={idx} className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={team}
+                      onChange={(e) => {
+                        const updated = [...formData.teams];
+                        updated[idx] = e.target.value;
                         setFormData({ ...formData, teams: updated });
                       }}
-                      className="text-red-500 text-sm px-2 hover:text-red-700"
-                    >
-                      Remove
-                    </button>
-                  )}
+                      className="flex-1 border rounded-lg px-3 py-2"
+                      placeholder="e.g., Mumbai Indians"
+                    />
+                    {formData.teams.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = formData.teams.filter((_, i) => i !== idx);
+                          setFormData({ ...formData, teams: updated });
+                        }}
+                        className="text-red-500 text-sm px-2 hover:text-red-700"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, teams: [...formData.teams, ""] })}
+                  className="text-primary text-sm hover:underline"
+                >
+                  + Add another team
+                </button>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Profile Background</label>
+                <div className="grid grid-cols-4 gap-2">
+                  {BACKGROUND_THEMES.map((theme) => {
+                    const isFlag = theme.key === "flag";
+                    const bg = isFlag
+                      ? getBackgroundStyle("flag", formData.nationality)
+                      : theme.style;
+                    const isSelected = formData.profile_background === theme.key;
+                    return (
+                      <button
+                        key={theme.key}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, profile_background: theme.key })}
+                        className={`h-16 rounded-lg relative overflow-hidden transition-all ${
+                          isSelected ? "ring-2 ring-primary ring-offset-2 scale-105" : "hover:scale-105"
+                        } ${isFlag && !formData.nationality ? "opacity-50" : ""}`}
+                        style={{ background: bg }}
+                        disabled={isFlag && !formData.nationality}
+                        title={isFlag && !formData.nationality ? "Select a nationality first" : theme.label}
+                      >
+                        <span className="absolute inset-0 flex items-center justify-center text-white text-xs font-medium drop-shadow-md">
+                          {isFlag ? (formData.nationality ? countryCodeToFlag(formData.nationality) : "Flag") : theme.label}
+                        </span>
+                        {isSelected && (
+                          <span className="absolute top-1 right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
+                            <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
-              ))}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                <textarea
+                  value={formData.bio}
+                  onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                  className="w-full border rounded-lg px-3 py-2"
+                  rows={4}
+                  placeholder="Tell fans about yourself, your achievements, your career..."
+                />
+              </div>
+
               <button
-                type="button"
-                onClick={() => setFormData({ ...formData, teams: [...formData.teams, ""] })}
-                className="text-primary text-sm hover:underline"
+                type="submit"
+                disabled={saving}
+                className="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary-dark disabled:opacity-50 font-medium"
               >
-                + Add another team
+                {saving ? "Saving..." : "Save Changes"}
               </button>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
-              <textarea
-                value={formData.bio}
-                onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                className="w-full border rounded-lg px-3 py-2"
-                rows={4}
-                placeholder="Tell fans about yourself, your achievements, your career..."
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={saving}
-              className="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary-dark disabled:opacity-50 font-medium"
-            >
-              {saving ? "Saving..." : "Save Changes"}
-            </button>
-          </form>
-        )}
+            </form>
+          )}
+        </div>
       </div>
     </div>
   );

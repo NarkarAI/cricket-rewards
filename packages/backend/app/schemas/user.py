@@ -19,9 +19,17 @@ class UserResponse(BaseModel):
     sport: str
     teams: list[str]
     bio: str
+    nationality: str
+    profile_background: str
     is_verified_player: bool
     geo: GeoResponse
     kyc_status: str
+
+
+ALLOWED_BACKGROUNDS = {
+    "", "flag", "gradient-blue", "gradient-gold", "gradient-green",
+    "gradient-purple", "dark", "sunset", "ocean",
+}
 
 
 class UserUpdateRequest(BaseModel):
@@ -30,6 +38,8 @@ class UserUpdateRequest(BaseModel):
     bio: Optional[str] = None
     sport: Optional[str] = None
     teams: Optional[list[str]] = None
+    nationality: Optional[str] = None
+    profile_background: Optional[str] = None
 
     @field_validator("teams")
     @classmethod
@@ -38,6 +48,22 @@ class UserUpdateRequest(BaseModel):
             v = [t.strip() for t in v if t.strip()]
             if len(v) > 10:
                 raise ValueError("Maximum 10 teams allowed")
+        return v
+
+    @field_validator("nationality")
+    @classmethod
+    def validate_nationality(cls, v):
+        if v is not None:
+            v = v.strip().upper()
+            if v and (len(v) != 2 or not v.isalpha()):
+                raise ValueError("Nationality must be a 2-letter country code")
+        return v
+
+    @field_validator("profile_background")
+    @classmethod
+    def validate_profile_background(cls, v):
+        if v is not None and v not in ALLOWED_BACKGROUNDS:
+            raise ValueError(f"Invalid background theme: {v}")
         return v
 
 
