@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { useAuthContext } from "@/components/auth/AuthProvider";
-import { countryCodeToFlag, getBackgroundStyle } from "@/lib/profileThemes";
+import { countryCodeToFlag } from "@/lib/profileThemes";
 import type { Player, PaginatedResponse } from "@/types";
 
 export default function PlayerProfilePage() {
@@ -34,77 +34,56 @@ export default function PlayerProfilePage() {
   if (loading) return <div className="max-w-4xl mx-auto px-4 py-8">Loading...</div>;
   if (!player) return <div className="max-w-4xl mx-auto px-4 py-8">Player not found.</div>;
 
-  const bannerBg = getBackgroundStyle(player.profile_background, player.nationality, player.banner_url);
   const flag = countryCodeToFlag(player.nationality);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="bg-white rounded-xl shadow-sm border overflow-hidden mb-8">
-        {/* Banner */}
-        <div
-          className="h-36 sm:h-44 relative"
-          style={{ background: bannerBg }}
-        >
-          {flag && (
-            <span className="absolute top-3 right-4 text-3xl drop-shadow-lg">{flag}</span>
+      <div className="bg-white rounded-xl shadow-sm border p-8 mb-8">
+        <div className="flex items-center gap-6 mb-6">
+          {player.avatar_url ? (
+            <img
+              src={player.avatar_url}
+              alt={player.display_name}
+              className="w-20 h-20 rounded-full object-cover"
+            />
+          ) : (
+            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-2xl">
+              {player.display_name?.[0] || "?"}
+            </div>
           )}
-        </div>
-
-        {/* Profile Content */}
-        <div className="relative px-6 sm:px-8 pb-8">
-          {/* Avatar overlapping the banner */}
-          <div className="-mt-12 mb-4">
-            {player.avatar_url ? (
-              <img
-                src={player.avatar_url}
-                alt={player.display_name}
-                className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
-              />
-            ) : (
-              <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-3xl border-4 border-white shadow-lg">
-                {player.display_name?.[0] || "?"}
-              </div>
-            )}
-          </div>
-
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold">
-                {player.display_name}
-                {flag && <span className="ml-2 text-2xl">{flag}</span>}
-              </h1>
-              <p className="text-gray-500">{player.sport}</p>
-              <div className="flex flex-wrap gap-1 mt-2">
-                {player.teams?.length > 0 ? player.teams.map((t, i) => (
-                  <span key={i} className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">{t}</span>
-                )) : (
-                  <span className="text-xs text-gray-400">No team listed</span>
-                )}
-              </div>
-              {player.is_verified_player && (
-                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded mt-2 inline-block">
-                  Verified Player
-                </span>
+          <div>
+            <h1 className="text-3xl font-bold">
+              {player.display_name}
+              {flag && <span className="ml-2 text-2xl">{flag}</span>}
+            </h1>
+            <p className="text-gray-500">{player.sport}</p>
+            <div className="flex flex-wrap gap-1 mt-1">
+              {player.teams?.length > 0 ? player.teams.map((t, i) => (
+                <span key={i} className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">{t}</span>
+              )) : (
+                <span className="text-xs text-gray-400">No team listed</span>
               )}
             </div>
-
-            {user && user.id !== playerId && (
-              <Link
-                href={`/reward/${playerId}`}
-                className="inline-block bg-accent text-white px-6 py-3 rounded-lg hover:bg-accent-dark font-semibold text-center"
-              >
-                Send Reward
-              </Link>
+            {player.is_verified_player && (
+              <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded mt-1 inline-block">
+                Verified Player
+              </span>
             )}
           </div>
-
-          {player.bio && (
-            <p className="text-gray-700 mt-4">{player.bio}</p>
-          )}
-          <p className="text-primary font-semibold mt-3">
-            {player.total_rewards_received} rewards received
-          </p>
         </div>
+        <p className="text-gray-700 mb-4">{player.bio}</p>
+        <p className="text-primary font-semibold">
+          {player.total_rewards_received} rewards received
+        </p>
+
+        {user && user.id !== playerId && (
+          <Link
+            href={`/reward/${playerId}`}
+            className="inline-block mt-4 bg-accent text-white px-6 py-3 rounded-lg hover:bg-accent-dark font-semibold"
+          >
+            Send Reward
+          </Link>
+        )}
       </div>
 
       <h2 className="text-xl font-bold mb-4">Recent Public Rewards</h2>

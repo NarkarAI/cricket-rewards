@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import { PlayerVerificationBadges } from "@/components/ui/VerificationBadges";
-import { countryCodeToFlag, getBackgroundStyle } from "@/lib/profileThemes";
+import { countryCodeToFlag } from "@/lib/profileThemes";
 import type { Player, PaginatedResponse } from "@/types";
 
 export default function PlayersPage() {
@@ -257,15 +257,9 @@ export default function PlayersPage() {
               <Link
                 key={player.id}
                 href={`/players/${player.id}`}
-                className="bg-white rounded-xl shadow-sm border hover:shadow-md transition overflow-hidden"
+                className="bg-white p-6 rounded-xl shadow-sm border hover:shadow-md transition"
               >
-                {/* Accent strip at top */}
-                <div
-                  className="h-2 w-full"
-                  style={{ background: getBackgroundStyle(player.profile_background, player.nationality, player.banner_url) }}
-                />
-                <div className="p-6 pt-4">
-                  <div className="flex items-center gap-4 mb-3">
+                <div className="flex items-center gap-4 mb-3">
                     {player.avatar_url ? (
                       <img
                         src={player.avatar_url}
@@ -303,7 +297,6 @@ export default function PlayersPage() {
                       {player.total_rewards_received} rewards received
                     </p>
                   )}
-                </div>
               </Link>
             ))}
           </div>
