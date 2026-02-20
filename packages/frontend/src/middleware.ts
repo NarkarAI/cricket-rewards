@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const VALID_SPORTS = ["cricket", "soccer", "basketball", "football", "tennis"];
+const VALID_SPORTS = ["cricket", "soccer", "basketball", "football", "tennis", "baseball"];
 
 // Paths that don't require authentication
 const PUBLIC_PATHS = ["/", "/login", "/register"];

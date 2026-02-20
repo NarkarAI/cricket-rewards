@@ -1,4 +1,4 @@
-export type SportSlug = "cricket" | "soccer" | "basketball" | "football" | "tennis";
+export type SportSlug = "cricket" | "soccer" | "basketball" | "football" | "tennis" | "baseball";
 
 export interface SportConfig {
   slug: SportSlug;
@@ -43,6 +43,13 @@ export const SPORTS: Record<SportSlug, SportConfig> = {
     label: "Tennis",
     sportValue: "Tennis",
     tagline: "Reward Your Favorite Tennis Players",
+  },
+  baseball: {
+    slug: "baseball",
+    name: "BaseballRewards",
+    label: "Baseball",
+    sportValue: "Baseball",
+    tagline: "Reward Your Favorite Baseball Players",
   },
 };
 

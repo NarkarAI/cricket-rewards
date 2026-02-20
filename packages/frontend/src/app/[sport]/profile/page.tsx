@@ -188,6 +188,7 @@ export default function ProfilePage() {
                 <option value="Basketball">Basketball</option>
                 <option value="Football">Football</option>
                 <option value="Tennis">Tennis</option>
+                <option value="Baseball">Baseball</option>
                 <option value="Other">Other</option>
               </select>
             </div>
