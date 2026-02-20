@@ -5,7 +5,6 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { useAuthContext } from "@/components/auth/AuthProvider";
-import { countryCodeToFlag } from "@/lib/profileThemes";
 import type { Player, PaginatedResponse } from "@/types";
 
 export default function PlayerProfilePage() {
@@ -34,8 +33,6 @@ export default function PlayerProfilePage() {
   if (loading) return <div className="max-w-4xl mx-auto px-4 py-8">Loading...</div>;
   if (!player) return <div className="max-w-4xl mx-auto px-4 py-8">Player not found.</div>;
 
-  const flag = countryCodeToFlag(player.nationality);
-
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="bg-white rounded-xl shadow-sm border p-8 mb-8">
@@ -52,10 +49,7 @@ export default function PlayerProfilePage() {
             </div>
           )}
           <div>
-            <h1 className="text-3xl font-bold">
-              {player.display_name}
-              {flag && <span className="ml-2 text-2xl">{flag}</span>}
-            </h1>
+            <h1 className="text-3xl font-bold">{player.display_name}</h1>
             <p className="text-gray-500">{player.sport}</p>
             <div className="flex flex-wrap gap-1 mt-1">
               {player.teams?.length > 0 ? player.teams.map((t, i) => (

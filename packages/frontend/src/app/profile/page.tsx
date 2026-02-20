@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { useAuthContext } from "@/components/auth/AuthProvider";
-import { COUNTRIES, countryCodeToFlag } from "@/lib/profileThemes";
+
+
 
 export default function ProfilePage() {
   const { user, loading, refreshUser } = useAuthContext();
@@ -17,7 +18,6 @@ export default function ProfilePage() {
     bio: "",
     sport: "Cricket",
     teams: [""],
-    nationality: "",
   });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -35,7 +35,6 @@ export default function ProfilePage() {
         bio: user.bio || "",
         sport: user.sport || "Cricket",
         teams: user.teams?.length > 0 ? [...user.teams] : [""],
-        nationality: user.nationality || "",
       });
     }
   }, [user]);
@@ -82,7 +81,6 @@ export default function ProfilePage() {
         bio: formData.bio.trim(),
         sport: formData.sport,
         teams: validTeams,
-        nationality: formData.nationality,
       });
       await refreshUser();
       setMessage("Profile updated successfully.");
@@ -148,12 +146,7 @@ export default function ProfilePage() {
             />
           </div>
           <div>
-            <p className="font-semibold text-lg">
-              {user.nationality && (
-                <span className="mr-2">{countryCodeToFlag(user.nationality)}</span>
-              )}
-              {user.display_name || user.email}
-            </p>
+            <p className="font-semibold text-lg">{user.display_name || user.email}</p>
             <p className="text-sm text-gray-500 capitalize">{user.role}</p>
             {uploading && <p className="text-xs text-primary">Uploading...</p>}
           </div>
@@ -179,36 +172,19 @@ export default function ProfilePage() {
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Sport</label>
-                <select
-                  value={formData.sport}
-                  onChange={(e) => setFormData({ ...formData, sport: e.target.value })}
-                  className="w-full border rounded-lg px-3 py-2"
-                >
-                  <option value="Cricket">Cricket</option>
-                  <option value="Football">Football</option>
-                  <option value="Basketball">Basketball</option>
-                  <option value="Tennis">Tennis</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
-                <select
-                  value={formData.nationality}
-                  onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
-                  className="w-full border rounded-lg px-3 py-2"
-                >
-                  <option value="">Select country</option>
-                  {COUNTRIES.map((c) => (
-                    <option key={c.code} value={c.code}>
-                      {countryCodeToFlag(c.code)} {c.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Sport</label>
+              <select
+                value={formData.sport}
+                onChange={(e) => setFormData({ ...formData, sport: e.target.value })}
+                className="w-full border rounded-lg px-3 py-2"
+              >
+                <option value="Cricket">Cricket</option>
+                <option value="Football">Football</option>
+                <option value="Basketball">Basketball</option>
+                <option value="Tennis">Tennis</option>
+                <option value="Other">Other</option>
+              </select>
             </div>
 
             <div>

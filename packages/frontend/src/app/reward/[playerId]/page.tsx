@@ -9,7 +9,6 @@ import { api } from "@/lib/api";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import { useGeo } from "@/hooks/useGeo";
 import { PaymentMethodSelector } from "@/components/payment/PaymentMethodSelector";
-import { countryCodeToFlag } from "@/lib/profileThemes";
 import type { Player, Reward } from "@/types";
 
 export default function RewardPage() {
@@ -72,10 +71,7 @@ export default function RewardPage() {
       <h1 className="text-2xl font-bold mb-2">Send Reward</h1>
       {player && (
         <p className="text-gray-600 mb-6">
-          To: <span className="font-semibold">
-            {player.nationality && <span className="mr-1">{countryCodeToFlag(player.nationality)}</span>}
-            {player.display_name}
-          </span> ({player.teams?.join(", ") || "No team"})
+          To: <span className="font-semibold">{player.display_name}</span> ({player.teams?.join(", ") || "No team"})
         </p>
       )}
 

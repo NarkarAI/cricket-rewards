@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import { PlayerVerificationBadges } from "@/components/ui/VerificationBadges";
-import { countryCodeToFlag } from "@/lib/profileThemes";
 import type { Player, PaginatedResponse } from "@/types";
 
 export default function PlayersPage() {
@@ -273,12 +272,7 @@ export default function PlayersPage() {
                     )}
                     <div className="flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-semibold">
-                          {player.nationality && (
-                            <span className="mr-1">{countryCodeToFlag(player.nationality)}</span>
-                          )}
-                          {player.display_name}
-                        </h3>
+                        <h3 className="font-semibold">{player.display_name}</h3>
                         <PlayerVerificationBadges user={player} compact />
                       </div>
                       <div className="flex flex-wrap gap-1">
