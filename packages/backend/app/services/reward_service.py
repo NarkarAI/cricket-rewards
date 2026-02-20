@@ -36,6 +36,10 @@ async def initiate_reward(
     if not receiver or receiver.role != "player":
         raise ValueError("Invalid receiver: must be a verified player")
 
+    # Prevent self-rewards
+    if str(sender.id) == receiver_id:
+        raise ValueError("You cannot send a reward to yourself")
+
     # Validate amount
     valid, error_msg = validate_reward_amount(amount, currency)
     if not valid:

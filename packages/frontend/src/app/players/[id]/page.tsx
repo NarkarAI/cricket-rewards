@@ -62,7 +62,7 @@ export default function PlayerProfilePage() {
           {player.total_rewards_received} rewards received
         </p>
 
-        {user && user.role !== "player" && (
+        {user && user.id !== playerId && (
           <Link
             href={`/reward/${playerId}`}
             className="inline-block mt-4 bg-accent text-white px-6 py-3 rounded-lg hover:bg-accent-dark font-semibold"

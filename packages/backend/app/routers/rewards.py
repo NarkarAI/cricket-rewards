@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 import redis.asyncio as aioredis
 
-from app.auth.dependencies import get_current_user, require_spectator
+from app.auth.dependencies import get_current_user
 from app.dependencies import get_redis
 from app.models.reward import Reward
 from app.models.user import User
@@ -16,7 +16,7 @@ router = APIRouter(prefix="/api/v1/rewards", tags=["rewards"])
 @router.post("/", response_model=RewardResponse)
 async def create_reward(
     req: CreateRewardRequest,
-    user: User = Depends(require_spectator),
+    user: User = Depends(get_current_user),
     redis_client: aioredis.Redis = Depends(get_redis),
 ):
     """Initiate a reward (creates reward + payment intent)."""
