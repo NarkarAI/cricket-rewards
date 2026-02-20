@@ -29,9 +29,17 @@ export function Navbar() {
             {loading ? (
               <span className="text-gray-400 text-sm">...</span>
             ) : user ? (
-              <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-primary text-sm font-bold">
-                {(user.display_name || user.email)?.[0]?.toUpperCase() || "?"}
-              </div>
+              user.avatar_url ? (
+                <img
+                  src={user.avatar_url}
+                  alt={user.display_name}
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-primary text-sm font-bold">
+                  {(user.display_name || user.email)?.[0]?.toUpperCase() || "?"}
+                </div>
+              )
             ) : (
               <Link href="/login" className="text-sm text-primary font-medium">
                 Login

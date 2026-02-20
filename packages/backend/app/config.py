@@ -33,6 +33,10 @@ class Settings(BaseSettings):
     kyc_max_file_size: int = 10 * 1024 * 1024  # 10MB
     kyc_allowed_types: str = "image/jpeg,image/png,image/webp,application/pdf"
 
+    # Avatar Storage
+    avatar_upload_dir: str = "/app/uploads/avatars"
+    avatar_max_file_size: int = 5 * 1024 * 1024  # 5MB
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",")]

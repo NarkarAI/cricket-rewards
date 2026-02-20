@@ -1,8 +1,13 @@
+import os
+import uuid
 from datetime import datetime
+from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File
+from fastapi.responses import FileResponse
 
 from app.auth.dependencies import get_current_user
+from app.config import settings
 from app.dependencies import get_client_ip
 from app.models.user import GeoInfo, User
 from app.schemas.user import GeoResponse, UserResponse, UserUpdateRequest
@@ -78,6 +83,53 @@ async def become_player(req: UserUpdateRequest, user: User = Depends(get_current
     user.updated_at = datetime.utcnow()
     await user.save()
     return _user_response(user)
+
+
+AVATAR_ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp"}
+
+
+@router.post("/me/avatar")
+async def upload_avatar(
+    file: UploadFile = File(...),
+    user: User = Depends(get_current_user),
+):
+    """Upload a profile picture."""
+    if file.content_type not in AVATAR_ALLOWED_TYPES:
+        raise HTTPException(status_code=400, detail="Only JPEG, PNG, and WebP images are allowed")
+
+    contents = await file.read()
+    if len(contents) > settings.avatar_max_file_size:
+        raise HTTPException(status_code=400, detail="File too large (max 5MB)")
+
+    ext = os.path.splitext(file.filename or "avatar")[1] or ".jpg"
+    filename = f"{user.id}_{uuid.uuid4().hex[:8]}{ext}"
+
+    avatar_dir = Path(settings.avatar_upload_dir)
+    avatar_dir.mkdir(parents=True, exist_ok=True)
+
+    # Remove old avatar file if exists
+    if user.avatar_url:
+        old_file = avatar_dir / user.avatar_url.split("/")[-1]
+        if old_file.exists():
+            old_file.unlink()
+
+    file_path = avatar_dir / filename
+    file_path.write_bytes(contents)
+
+    user.avatar_url = f"/api/v1/users/avatars/{filename}"
+    user.updated_at = datetime.utcnow()
+    await user.save()
+
+    return {"avatar_url": user.avatar_url}
+
+
+@router.get("/avatars/{filename}")
+async def get_avatar(filename: str):
+    """Serve avatar image (public, no auth required)."""
+    file_path = Path(settings.avatar_upload_dir) / filename
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Avatar not found")
+    return FileResponse(path=str(file_path))
 
 
 @router.get("/{user_id}", response_model=UserResponse)

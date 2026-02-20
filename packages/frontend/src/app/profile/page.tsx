@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
@@ -9,6 +9,7 @@ import { useAuthContext } from "@/components/auth/AuthProvider";
 export default function ProfilePage() {
   const { user, loading, refreshUser } = useAuthContext();
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     display_name: "",
     bio: "",
@@ -16,6 +17,7 @@ export default function ProfilePage() {
     teams: [""],
   });
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -33,6 +35,34 @@ export default function ProfilePage() {
       });
     }
   }, [user]);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setError("Please select an image file (JPEG, PNG, or WebP).");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Image must be under 5MB.");
+      return;
+    }
+
+    setError("");
+    setMessage("");
+    setUploading(true);
+    try {
+      await api.uploadAvatar(file);
+      await refreshUser();
+      setMessage("Profile picture updated.");
+    } catch (err: any) {
+      setError(err.message || "Failed to upload picture.");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,6 +96,7 @@ export default function ProfilePage() {
   if (!user) return null;
 
   const isPlayer = user.role === "player";
+  const avatarSrc = user.avatar_url || "";
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
@@ -84,12 +115,41 @@ export default function ProfilePage() {
 
       <div className="bg-white rounded-xl border p-6">
         <div className="flex items-center gap-4 mb-6 pb-4 border-b">
-          <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-xl">
-            {user.display_name?.[0]?.toUpperCase() || "?"}
+          <div className="relative group">
+            {avatarSrc ? (
+              <img
+                src={avatarSrc}
+                alt={user.display_name}
+                className="w-16 h-16 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-xl">
+                {user.display_name?.[0]?.toUpperCase() || "?"}
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+            >
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handleAvatarUpload}
+              className="hidden"
+            />
           </div>
           <div>
             <p className="font-semibold text-lg">{user.display_name || user.email}</p>
             <p className="text-sm text-gray-500 capitalize">{user.role}</p>
+            {uploading && <p className="text-xs text-primary">Uploading...</p>}
           </div>
         </div>
 

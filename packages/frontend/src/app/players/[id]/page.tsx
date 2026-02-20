@@ -37,9 +37,17 @@ export default function PlayerProfilePage() {
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="bg-white rounded-xl shadow-sm border p-8 mb-8">
         <div className="flex items-center gap-6 mb-6">
-          <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-2xl">
-            {player.display_name?.[0] || "?"}
-          </div>
+          {player.avatar_url ? (
+            <img
+              src={player.avatar_url}
+              alt={player.display_name}
+              className="w-20 h-20 rounded-full object-cover"
+            />
+          ) : (
+            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-2xl">
+              {player.display_name?.[0] || "?"}
+            </div>
+          )}
           <div>
             <h1 className="text-3xl font-bold">{player.display_name}</h1>
             <p className="text-gray-500">{player.sport}</p>

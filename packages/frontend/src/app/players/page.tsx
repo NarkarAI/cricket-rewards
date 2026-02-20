@@ -259,9 +259,17 @@ export default function PlayersPage() {
                 className="bg-white p-6 rounded-xl shadow-sm border hover:shadow-md transition"
               >
                 <div className="flex items-center gap-4 mb-3">
-                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-lg">
-                    {player.display_name?.[0] || "?"}
-                  </div>
+                  {player.avatar_url ? (
+                    <img
+                      src={player.avatar_url}
+                      alt={player.display_name}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-lg">
+                      {player.display_name?.[0] || "?"}
+                    </div>
+                  )}
                   <div className="flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-semibold">{player.display_name}</h3>
