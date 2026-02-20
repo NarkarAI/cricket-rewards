@@ -5,10 +5,14 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import { api } from "@/lib/api";
+import { sportPath } from "@/lib/sportConfig";
 import type { Reward } from "@/types";
 
 export default function RewardDetailPage() {
-  const { rewardId } = useParams<{ rewardId: string }>();
+  const params = useParams();
+  const rewardId = params.rewardId as string;
+  const sport = params.sport as string;
+  const sp = (path: string) => sportPath(sport, path);
   const { user, loading: authLoading } = useAuthContext();
   const [reward, setReward] = useState<Reward | null>(null);
   const [error, setError] = useState("");
@@ -34,7 +38,7 @@ export default function RewardDetailPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <Link href="/rewards" className="text-primary text-sm mb-4 inline-block">
+      <Link href={sp("/rewards")} className="text-primary text-sm mb-4 inline-block">
         &larr; Back to Rewards
       </Link>
 

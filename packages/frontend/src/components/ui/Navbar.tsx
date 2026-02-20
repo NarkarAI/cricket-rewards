@@ -3,25 +3,31 @@
 import Link from "next/link";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import { logout } from "@/lib/firebase";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+import { getSportFromPath, SPORTS, sportPath } from "@/lib/sportConfig";
 
 export function Navbar() {
   const { user, loading } = useAuthContext();
   const router = useRouter();
+  const pathname = usePathname();
+  const sport = getSportFromPath(pathname);
+  const config = SPORTS[sport];
 
   const handleLogout = async () => {
     await logout();
     document.cookie = "firebase-auth-token=; path=/; max-age=0";
-    router.push("/");
+    router.push(`/${sport}`);
   };
+
+  const sp = (path: string) => sportPath(sport, path);
 
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-14 items-center">
           {/* Logo */}
-          <Link href="/" className="text-xl font-bold text-primary">
-            CricRewards
+          <Link href={`/${sport}`} className="text-xl font-bold text-primary">
+            {config.name}
           </Link>
 
           {/* Mobile: just avatar or login link (navigation is in BottomNav) */}
@@ -49,25 +55,25 @@ export function Navbar() {
 
           {/* Desktop nav links */}
           <div className="hidden md:flex items-center space-x-6">
-            <Link href="/players" className="text-gray-600 hover:text-gray-900 text-sm">
+            <Link href={sp("/players")} className="text-gray-600 hover:text-gray-900 text-sm">
               Players
             </Link>
             {user && (
               <>
-                <Link href="/dashboard" className="text-gray-600 hover:text-gray-900 text-sm">
+                <Link href={sp("/dashboard")} className="text-gray-600 hover:text-gray-900 text-sm">
                   Dashboard
                 </Link>
-                <Link href="/wallet" className="text-gray-600 hover:text-gray-900 text-sm">
+                <Link href={sp("/wallet")} className="text-gray-600 hover:text-gray-900 text-sm">
                   Wallet
                 </Link>
-                <Link href="/rewards" className="text-gray-600 hover:text-gray-900 text-sm">
+                <Link href={sp("/rewards")} className="text-gray-600 hover:text-gray-900 text-sm">
                   Rewards
                 </Link>
-                <Link href="/profile" className="text-gray-600 hover:text-gray-900 text-sm">
+                <Link href={sp("/profile")} className="text-gray-600 hover:text-gray-900 text-sm">
                   Profile
                 </Link>
                 {user.role === "player" && (
-                  <Link href="/kyc" className="text-gray-600 hover:text-gray-900 text-sm">
+                  <Link href={sp("/kyc")} className="text-gray-600 hover:text-gray-900 text-sm">
                     KYC
                   </Link>
                 )}

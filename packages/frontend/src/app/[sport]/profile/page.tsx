@@ -1,16 +1,20 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { useAuthContext } from "@/components/auth/AuthProvider";
+import { sportPath } from "@/lib/sportConfig";
 
 
 
 export default function ProfilePage() {
   const { user, loading, refreshUser } = useAuthContext();
   const router = useRouter();
+  const params = useParams();
+  const sport = params.sport as string;
+  const sp = (path: string) => sportPath(sport, path);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
@@ -155,7 +159,7 @@ export default function ProfilePage() {
         {!isPlayer ? (
           <div className="text-center py-8">
             <p className="text-gray-600 mb-4">Profile editing is available for players.</p>
-            <Link href="/players" className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark">
+            <Link href={sp("/players")} className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark">
               Become a Player
             </Link>
           </div>
@@ -180,8 +184,9 @@ export default function ProfilePage() {
                 className="w-full border rounded-lg px-3 py-2"
               >
                 <option value="Cricket">Cricket</option>
-                <option value="Football">Football</option>
+                <option value="Soccer">Soccer</option>
                 <option value="Basketball">Basketball</option>
+                <option value="Football">Football</option>
                 <option value="Tennis">Tennis</option>
                 <option value="Other">Other</option>
               </select>

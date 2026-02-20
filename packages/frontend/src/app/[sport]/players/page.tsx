@@ -2,25 +2,30 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import { PlayerVerificationBadges } from "@/components/ui/VerificationBadges";
+import { SPORTS, sportPath } from "@/lib/sportConfig";
 import type { Player, PaginatedResponse } from "@/types";
 
 export default function PlayersPage() {
+  const params = useParams();
+  const sport = params.sport as string;
+  const config = SPORTS[sport as keyof typeof SPORTS];
   const { user, refreshUser } = useAuthContext();
-  const router = useRouter();
   const [data, setData] = useState<PaginatedResponse<Player> | null>(null);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
+  const sp = (path: string) => sportPath(sport, path);
+
   // Become a player form
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     display_name: "",
-    sport: "Cricket",
+    sport: config?.sportValue || "Cricket",
     teams: [""],
     bio: "",
   });
@@ -31,13 +36,13 @@ export default function PlayersPage() {
     async function fetchPlayers() {
       setLoading(true);
       try {
-        const result = await api.listPlayers(page, search);
+        const result = await api.listPlayers(page, search, config?.sportValue);
         setData(result);
       } catch {}
       setLoading(false);
     }
     fetchPlayers();
-  }, [page, search]);
+  }, [page, search, config?.sportValue]);
 
   useEffect(() => {
     if (user) {
@@ -61,8 +66,7 @@ export default function PlayersPage() {
       await api.becomePlayer({ ...formData, teams: validTeams });
       await refreshUser();
       setShowForm(false);
-      // Refresh players list
-      const result = await api.listPlayers(1, "");
+      const result = await api.listPlayers(1, "", config?.sportValue);
       setData(result);
       setPage(1);
       setSearch("");
@@ -80,7 +84,7 @@ export default function PlayersPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold">Cricket Players</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">{config?.label || "All"} Players</h1>
         {isSpectator && (
           <button
             onClick={() => setShowForm(!showForm)}
@@ -115,7 +119,7 @@ export default function PlayersPage() {
             </div>
             {user.kyc_status !== "pending" && (
               <Link
-                href="/kyc"
+                href={sp("/kyc")}
                 className="bg-primary text-white px-4 py-2 rounded-lg text-sm whitespace-nowrap hover:bg-primary-dark"
               >
                 {user.kyc_status === "rejected" ? "Re-upload Documents" : "Start KYC"}
@@ -163,17 +167,12 @@ export default function PlayersPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Sport</label>
-                <select
+                <input
+                  type="text"
                   value={formData.sport}
-                  onChange={(e) => setFormData({ ...formData, sport: e.target.value })}
-                  className="w-full border rounded-lg px-3 py-2"
-                >
-                  <option value="Cricket">Cricket</option>
-                  <option value="Football">Football</option>
-                  <option value="Basketball">Basketball</option>
-                  <option value="Tennis">Tennis</option>
-                  <option value="Other">Other</option>
-                </select>
+                  className="w-full border rounded-lg px-3 py-2 bg-gray-50"
+                  disabled
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Team(s) *</label>
@@ -239,7 +238,7 @@ export default function PlayersPage() {
       <div className="mb-6">
         <input
           type="text"
-          placeholder="Search players by name, sport, or team..."
+          placeholder={`Search ${config?.label?.toLowerCase() || ""} players by name or team...`}
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           className="w-full max-w-md border rounded-lg px-4 py-2"
@@ -255,7 +254,7 @@ export default function PlayersPage() {
             {data.items.map((player: any) => (
               <Link
                 key={player.id}
-                href={`/players/${player.id}`}
+                href={sp(`/players/${player.id}`)}
                 className="bg-white p-6 rounded-xl shadow-sm border hover:shadow-md transition"
               >
                 <div className="flex items-center gap-4 mb-3">
@@ -319,7 +318,7 @@ export default function PlayersPage() {
         </>
       ) : (
         <div className="bg-white rounded-xl border p-8 text-center">
-          <p className="text-gray-500 mb-2">No verified players yet.</p>
+          <p className="text-gray-500 mb-2">No {config?.label?.toLowerCase()} players yet.</p>
           {!user && (
             <p className="text-sm text-gray-400">
               <Link href="/register" className="text-primary hover:underline">Register</Link> and become a player to appear here.

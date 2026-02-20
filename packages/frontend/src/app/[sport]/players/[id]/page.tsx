@@ -5,12 +5,15 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { useAuthContext } from "@/components/auth/AuthProvider";
+import { sportPath } from "@/lib/sportConfig";
 import type { Player, PaginatedResponse } from "@/types";
 
 export default function PlayerProfilePage() {
   const params = useParams();
   const playerId = params.id as string;
+  const sport = params.sport as string;
   const { user } = useAuthContext();
+  const sp = (path: string) => sportPath(sport, path);
   const [player, setPlayer] = useState<Player | null>(null);
   const [rewards, setRewards] = useState<PaginatedResponse<any> | null>(null);
   const [loading, setLoading] = useState(true);
@@ -72,7 +75,7 @@ export default function PlayerProfilePage() {
 
         {user && user.id !== playerId && (
           <Link
-            href={`/reward/${playerId}`}
+            href={sp(`/reward/${playerId}`)}
             className="inline-block mt-4 bg-accent text-white px-6 py-3 rounded-lg hover:bg-accent-dark font-semibold"
           >
             Send Reward

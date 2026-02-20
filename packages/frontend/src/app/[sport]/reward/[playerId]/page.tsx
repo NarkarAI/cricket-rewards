@@ -9,11 +9,13 @@ import { api } from "@/lib/api";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import { useGeo } from "@/hooks/useGeo";
 import { PaymentMethodSelector } from "@/components/payment/PaymentMethodSelector";
+import { sportPath } from "@/lib/sportConfig";
 import type { Player, Reward } from "@/types";
 
 export default function RewardPage() {
   const params = useParams();
   const playerId = params.playerId as string;
+  const sport = params.sport as string;
   const router = useRouter();
   const { user } = useAuthContext();
   const { geo } = useGeo();
@@ -145,7 +147,7 @@ export default function RewardPage() {
             Your reward will be delivered once payment is confirmed.
           </p>
           <button
-            onClick={() => router.push("/rewards")}
+            onClick={() => router.push(sportPath(sport, "/rewards"))}
             className="bg-primary text-white px-6 py-2 rounded-lg"
           >
             View My Rewards

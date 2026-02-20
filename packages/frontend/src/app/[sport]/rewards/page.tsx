@@ -2,11 +2,16 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import { api } from "@/lib/api";
+import { sportPath } from "@/lib/sportConfig";
 import type { PaginatedResponse, RewardSummary } from "@/types";
 
 export default function RewardsPage() {
+  const params = useParams();
+  const sport = params.sport as string;
+  const sp = (path: string) => sportPath(sport, path);
   const { user, loading: authLoading } = useAuthContext();
   const [tab, setTab] = useState<"sent" | "received">("sent");
   const [sent, setSent] = useState<PaginatedResponse<RewardSummary> | null>(null);
@@ -61,7 +66,7 @@ export default function RewardsPage() {
               {data.items.map((r) => (
                 <Link
                   key={r.reward_id}
-                  href={`/rewards/${r.reward_id}`}
+                  href={sp(`/rewards/${r.reward_id}`)}
                   className="block p-4 hover:bg-gray-50"
                 >
                   <div className="flex justify-between items-start">

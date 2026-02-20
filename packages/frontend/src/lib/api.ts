@@ -73,8 +73,11 @@ export const api = {
   },
 
   // Players
-  listPlayers: (page = 1, search = "") =>
-    request<any>(`/api/v1/players/?page=${page}&search=${encodeURIComponent(search)}`),
+  listPlayers: (page = 1, search = "", sport = "") => {
+    let url = `/api/v1/players/?page=${page}&search=${encodeURIComponent(search)}`;
+    if (sport) url += `&sport=${encodeURIComponent(sport)}`;
+    return request<any>(url);
+  },
   getPlayer: (id: string) => request<any>(`/api/v1/players/${id}`),
   getPlayerRewards: (id: string, page = 1) =>
     request<any>(`/api/v1/players/${id}/rewards?page=${page}`),

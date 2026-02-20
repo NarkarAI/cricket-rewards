@@ -2,11 +2,16 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { useAuthContext } from "@/components/auth/AuthProvider";
 import { api } from "@/lib/api";
+import { sportPath } from "@/lib/sportConfig";
 import type { Wallet } from "@/types";
 
 export default function DashboardPage() {
+  const params = useParams();
+  const sport = params.sport as string;
+  const sp = (path: string) => sportPath(sport, path);
   const { user, loading: authLoading } = useAuthContext();
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [recentSent, setRecentSent] = useState<any>(null);
@@ -54,7 +59,7 @@ export default function DashboardPage() {
         <div>
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold">Recent Sent</h2>
-            <Link href="/rewards" className="text-primary text-sm">View all</Link>
+            <Link href={sp("/rewards")} className="text-primary text-sm">View all</Link>
           </div>
           {recentSent?.items?.slice(0, 5).map((r: any) => (
             <div key={r.reward_id} className="bg-white p-3 rounded border mb-2">
@@ -72,7 +77,7 @@ export default function DashboardPage() {
         <div>
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold">Recent Received</h2>
-            <Link href="/rewards" className="text-primary text-sm">View all</Link>
+            <Link href={sp("/rewards")} className="text-primary text-sm">View all</Link>
           </div>
           {recentReceived?.items?.slice(0, 5).map((r: any) => (
             <div key={r.reward_id} className="bg-white p-3 rounded border mb-2">
@@ -89,10 +94,10 @@ export default function DashboardPage() {
       </div>
 
       <div className="mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4">
-        <Link href="/players" className="bg-primary text-white px-6 py-2 rounded-lg text-center">
+        <Link href={sp("/players")} className="bg-primary text-white px-6 py-2 rounded-lg text-center">
           Browse Players
         </Link>
-        <Link href="/wallet" className="border border-primary text-primary px-6 py-2 rounded-lg text-center">
+        <Link href={sp("/wallet")} className="border border-primary text-primary px-6 py-2 rounded-lg text-center">
           Wallet Details
         </Link>
       </div>

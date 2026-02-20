@@ -11,11 +11,15 @@ router = APIRouter(prefix="/api/v1/players", tags=["players"])
 @router.get("/")
 async def list_players(
     search: str = Query("", description="Search by name, sport, or team"),
+    sport: str = Query("", description="Filter by sport (exact match)"),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
 ):
     """List all players with pagination and search."""
-    query_filter = {"role": "player"}
+    query_filter: dict = {"role": "player"}
+
+    if sport:
+        query_filter["sport"] = {"$regex": f"^{sport}$", "$options": "i"}
 
     if search:
         query_filter["$or"] = [

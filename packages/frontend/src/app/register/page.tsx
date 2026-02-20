@@ -20,7 +20,7 @@ export default function RegisterPage() {
   // Redirect if already authenticated (e.g. after Google sign-in)
   useEffect(() => {
     if (!authLoading && authUser) {
-      router.push("/dashboard");
+      router.push("/cricket/dashboard");
     }
   }, [authUser, authLoading, router]);
 
@@ -33,7 +33,7 @@ export default function RegisterPage() {
       const token = await cred.user.getIdToken();
       document.cookie = `firebase-auth-token=${token}; path=/; max-age=3600; SameSite=Lax`;
       await api.register(token, name);
-      router.push("/dashboard");
+      router.push("/cricket/dashboard");
     } catch (err: any) {
       setError(err.message);
     }
@@ -48,7 +48,7 @@ export default function RegisterPage() {
       const token = await cred.user.getIdToken();
       document.cookie = `firebase-auth-token=${token}; path=/; max-age=3600; SameSite=Lax`;
       await api.register(token, cred.user.displayName || "");
-      router.push("/dashboard");
+      router.push("/cricket/dashboard");
     } catch (err: any) {
       setError(err.message);
     }

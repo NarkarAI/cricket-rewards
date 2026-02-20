@@ -6,13 +6,13 @@ import { ClientShell } from "@/components/ClientShell";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "CricRewards - Cricket Fan Rewards Platform",
-  description: "Reward your favorite cricket players with real money",
+  title: "RewardsByFan - Sports Fan Rewards Platform",
+  description: "Reward your favorite sports players with real money",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "CricRewards",
+    title: "RewardsByFan",
   },
   formatDetection: {
     telephone: false,
