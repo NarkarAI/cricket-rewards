@@ -102,9 +102,15 @@ export async function requestPushPermission(): Promise<string | null> {
     const permission = await Notification.requestPermission();
     if (permission !== "granted") return null;
 
+    // Register the FCM-specific service worker (separate from the PWA sw.js)
+    const swRegistration = await navigator.serviceWorker.register(
+      "/firebase-messaging-sw.js",
+      { scope: "/firebase-cloud-messaging-push-scope" }
+    );
+
     const token = await getToken(messaging, {
       vapidKey: VAPID_KEY,
-      serviceWorkerRegistration: await navigator.serviceWorker.getRegistration(),
+      serviceWorkerRegistration: swRegistration,
     });
     return token || null;
   } catch (err) {

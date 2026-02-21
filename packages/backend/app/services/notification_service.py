@@ -44,18 +44,25 @@ async def _send_email(to_email: str, subject: str, html_body: str) -> None:
         logger.exception("Failed to send email to %s", to_email)
 
 
-def _send_push_sync(tokens: list[str], title: str, body: str) -> None:
-    """Send push notification to FCM tokens (blocking, run in executor)."""
+def _send_push_sync(tokens: list[str], title: str, body: str) -> list[str]:
+    """Send push notification to FCM tokens. Returns list of stale tokens to remove."""
     if not tokens:
-        return
+        return []
     init_firebase()
     messages = [
         messaging.Message(
-            notification=messaging.Notification(title=title, body=body),
+            webpush=messaging.WebpushConfig(
+                notification=messaging.WebpushNotification(
+                    title=title,
+                    body=body,
+                    icon="/icons/icon-192.png",
+                ),
+            ),
             token=token,
         )
         for token in tokens
     ]
+    stale_tokens = []
     try:
         response = messaging.send_each(messages)
         logger.info(
@@ -63,8 +70,13 @@ def _send_push_sync(tokens: list[str], title: str, body: str) -> None:
             response.success_count,
             response.failure_count,
         )
+        # Collect stale tokens for cleanup
+        for i, send_response in enumerate(response.responses):
+            if send_response.exception and "NotRegistered" in str(send_response.exception):
+                stale_tokens.append(tokens[i])
     except Exception:
         logger.exception("Failed to send push notifications")
+    return stale_tokens
 
 
 async def _send_push(user_id: str, title: str, body: str) -> None:
@@ -74,7 +86,12 @@ async def _send_push(user_id: str, title: str, body: str) -> None:
         logger.info("No FCM tokens for user %s — skipping push", user_id)
         return
     loop = asyncio.get_event_loop()
-    await loop.run_in_executor(None, _send_push_sync, user.fcm_tokens, title, body)
+    stale = await loop.run_in_executor(None, _send_push_sync, user.fcm_tokens, title, body)
+    # Auto-clean stale tokens
+    if stale:
+        user.fcm_tokens = [t for t in user.fcm_tokens if t not in stale]
+        await user.save()
+        logger.info("Removed %d stale FCM token(s) for user %s", len(stale), user_id)
 
 
 def _format_amount(amount, currency: str) -> str:
