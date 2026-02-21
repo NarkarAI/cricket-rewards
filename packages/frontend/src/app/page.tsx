@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { SPORTS, SPORT_SLUGS, type SportSlug } from "@/lib/sportConfig";
+import { SPORTS, SPORT_SLUGS } from "@/lib/sportConfig";
 
 const sports = SPORT_SLUGS.map((slug) => SPORTS[slug]);
 
@@ -26,31 +26,53 @@ export default function LandingPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 sm:py-12">
-      {/* Hero slideshow */}
+      {/* Hero slideshow with fan images */}
       <div
-        className="relative rounded-2xl overflow-hidden mb-8 transition-colors duration-700"
-        style={{
-          background: `linear-gradient(135deg, ${current.color}, ${current.color}cc, ${current.color}66)`,
-        }}
+        className="relative rounded-2xl overflow-hidden mb-8"
+        style={{ minHeight: 400 }}
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
       >
-        <div className="relative z-10 px-6 sm:px-12 py-12 sm:py-20 text-center text-white">
-          <p className="text-sm sm:text-base font-medium uppercase tracking-wider opacity-90 mb-3">
+        {/* Background images — all preloaded, only active one visible */}
+        {sports.map((sport, i) => (
+          <div
+            key={sport.slug}
+            className="absolute inset-0 transition-opacity duration-700"
+            style={{
+              opacity: i === active ? 1 : 0,
+              backgroundImage: `url(${sport.image})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          />
+        ))}
+
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 bg-black/50" />
+
+        {/* Content */}
+        <div className="relative z-10 px-6 sm:px-12 py-16 sm:py-24 text-center text-white">
+          <p
+            className="text-sm sm:text-base font-semibold uppercase tracking-widest mb-3"
+            style={{ color: current.color, textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}
+          >
             {current.name}
           </p>
-          <h1 className="text-3xl sm:text-5xl font-bold mb-4 transition-all duration-500">
+          <h1 className="text-3xl sm:text-5xl font-bold mb-4 drop-shadow-lg">
             {current.tagline}
           </h1>
-          <p className="text-base sm:text-lg opacity-90 max-w-xl mx-auto mb-8">
+          <p className="text-base sm:text-lg text-gray-200 max-w-xl mx-auto mb-8 drop-shadow">
             Show your appreciation by sending real money rewards to{" "}
             {current.label.toLowerCase()} players. Secure payments with real-time
             notifications.
           </p>
           <Link
             href={`/${current.slug}/players`}
-            className="inline-block bg-white font-semibold px-8 py-3 rounded-lg text-lg hover:bg-gray-100 transition-colors"
-            style={{ color: current.color }}
+            className="inline-block font-semibold px-8 py-3 rounded-lg text-lg transition-colors shadow-lg"
+            style={{
+              backgroundColor: current.color,
+              color: "#fff",
+            }}
           >
             Browse {current.label} Players
           </Link>

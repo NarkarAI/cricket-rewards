@@ -7,6 +7,7 @@ export interface SportConfig {
   sportValue: string;  // Value stored in user.sport field in DB
   tagline: string;     // Landing page tagline
   color: string;       // Accent color for slideshow/branding
+  image: string;       // Fan image for landing page slideshow
 }
 
 export const SPORTS: Record<SportSlug, SportConfig> = {
@@ -17,6 +18,7 @@ export const SPORTS: Record<SportSlug, SportConfig> = {
     sportValue: "Cricket",
     tagline: "Reward Your Favorite Cricket Players",
     color: "#2563eb",
+    image: "/images/fans/cricket.jpg",
   },
   soccer: {
     slug: "soccer",
@@ -25,6 +27,7 @@ export const SPORTS: Record<SportSlug, SportConfig> = {
     sportValue: "Soccer",
     tagline: "Reward Your Favorite Soccer Players",
     color: "#16a34a",
+    image: "/images/fans/soccer.jpg",
   },
   basketball: {
     slug: "basketball",
@@ -33,6 +36,7 @@ export const SPORTS: Record<SportSlug, SportConfig> = {
     sportValue: "Basketball",
     tagline: "Reward Your Favorite Basketball Players",
     color: "#ea580c",
+    image: "/images/fans/basketball.jpg",
   },
   football: {
     slug: "football",
@@ -41,6 +45,7 @@ export const SPORTS: Record<SportSlug, SportConfig> = {
     sportValue: "Football",
     tagline: "Reward Your Favorite Football Players",
     color: "#4f46e5",
+    image: "/images/fans/football.jpg",
   },
   tennis: {
     slug: "tennis",
@@ -49,6 +54,7 @@ export const SPORTS: Record<SportSlug, SportConfig> = {
     sportValue: "Tennis",
     tagline: "Reward Your Favorite Tennis Players",
     color: "#65a30d",
+    image: "/images/fans/tennis.jpg",
   },
   baseball: {
     slug: "baseball",
@@ -57,6 +63,7 @@ export const SPORTS: Record<SportSlug, SportConfig> = {
     sportValue: "Baseball",
     tagline: "Reward Your Favorite Baseball Players",
     color: "#dc2626",
+    image: "/images/fans/baseball.jpg",
   },
 };
 
