@@ -1,3 +1,5 @@
+import asyncio
+import logging
 from datetime import datetime
 from decimal import Decimal
 
@@ -7,10 +9,13 @@ from app.models.reward import Reward, StatusHistoryEntry
 from app.models.user import User
 from app.services import aml_service, fee_engine, ledger_service, wallet_service
 from app.services.fraud_service import run_fraud_checks
+from app.services.notification_service import notify_reward_failure, notify_reward_success
 from app.services.stripe_service import create_payment_intent
 from app.services.razorpay_service import create_order as create_razorpay_order
 from app.utils.currency import validate_reward_amount
 from app.utils.exceptions import DuplicateRewardError, FraudCheckFailedError
+
+logger = logging.getLogger(__name__)
 
 
 async def initiate_reward(
@@ -180,7 +185,24 @@ async def complete_reward(reward_id: str, emitter=None) -> Reward:
         await emitter.emit_reward_new(reward.receiver_id, reward)
         await emitter.emit_reward_status(reward.sender_id, reward)
 
+    # Send email + SMS notifications (fire-and-forget)
+    asyncio.create_task(_safe_notify_success(reward))
+
     return reward
+
+
+async def _safe_notify_success(reward):
+    try:
+        await notify_reward_success(reward)
+    except Exception:
+        logger.exception("Notification error for reward %s", reward.reward_id)
+
+
+async def _safe_notify_failure(reward):
+    try:
+        await notify_reward_failure(reward)
+    except Exception:
+        logger.exception("Notification error for reward %s", reward.reward_id)
 
 
 async def fail_reward(reward_id: str, reason: str = "") -> Reward:
@@ -192,6 +214,10 @@ async def fail_reward(reward_id: str, reason: str = "") -> Reward:
     reward.status_history.append(StatusHistoryEntry(status="failed", reason=reason))
     reward.updated_at = datetime.utcnow()
     await reward.save()
+
+    # Send failure notification to spectator only (fire-and-forget)
+    asyncio.create_task(_safe_notify_failure(reward))
+
     return reward
 
 

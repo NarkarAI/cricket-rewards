@@ -16,6 +16,7 @@ class UserResponse(BaseModel):
     email: str
     display_name: str
     avatar_url: str
+    phone_number: str
     role: str
     sport: str
     teams: list[str]
@@ -39,6 +40,7 @@ HEX_COLOR_RE = re.compile(r"^#[0-9A-Fa-f]{6}$")
 class UserUpdateRequest(BaseModel):
     display_name: Optional[str] = None
     avatar_url: Optional[str] = None
+    phone_number: Optional[str] = None
     bio: Optional[str] = None
     sport: Optional[str] = None
     teams: Optional[list[str]] = None

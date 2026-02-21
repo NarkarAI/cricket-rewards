@@ -33,6 +33,7 @@ class User(Document):
     email: EmailStr
     display_name: str = ""
     avatar_url: str = ""
+    phone_number: str = ""
 
     role: str = Field(default="spectator")  # spectator | player | admin
 

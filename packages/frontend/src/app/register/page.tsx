@@ -11,6 +11,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -33,6 +34,9 @@ export default function RegisterPage() {
       const token = await cred.user.getIdToken();
       document.cookie = `firebase-auth-token=${token}; path=/; max-age=3600; SameSite=Lax`;
       await api.register(token, name);
+      if (phone.trim()) {
+        await api.updateProfile({ phone_number: phone.trim() });
+      }
       router.push("/cricket/dashboard");
     } catch (err: any) {
       setError(err.message);
@@ -48,6 +52,9 @@ export default function RegisterPage() {
       const token = await cred.user.getIdToken();
       document.cookie = `firebase-auth-token=${token}; path=/; max-age=3600; SameSite=Lax`;
       await api.register(token, cred.user.displayName || "");
+      if (phone.trim()) {
+        await api.updateProfile({ phone_number: phone.trim() });
+      }
       router.push("/cricket/dashboard");
     } catch (err: any) {
       setError(err.message);
@@ -80,6 +87,18 @@ export default function RegisterPage() {
             onChange={(e) => setEmail(e.target.value)}
             className="w-full border rounded-lg px-3 py-2 text-base"
             required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Phone Number <span className="text-gray-400 font-normal">(optional)</span>
+          </label>
+          <input
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="w-full border rounded-lg px-3 py-2 text-base"
+            placeholder="+1 234 567 8900"
           />
         </div>
         <div>

@@ -23,6 +23,7 @@ def _user_response(user: User) -> UserResponse:
         email=user.email,
         display_name=user.display_name,
         avatar_url=user.avatar_url,
+        phone_number=user.phone_number,
         role=user.role,
         sport=user.sport,
         teams=user.teams,

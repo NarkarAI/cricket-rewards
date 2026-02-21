@@ -19,6 +19,7 @@ export default function ProfilePage() {
 
   const [formData, setFormData] = useState({
     display_name: "",
+    phone_number: "",
     bio: "",
     sport: "Cricket",
     teams: [""],
@@ -36,6 +37,7 @@ export default function ProfilePage() {
     if (user) {
       setFormData({
         display_name: user.display_name || "",
+        phone_number: user.phone_number || "",
         bio: user.bio || "",
         sport: user.sport || "Cricket",
         teams: user.teams?.length > 0 ? [...user.teams] : [""],
@@ -82,6 +84,7 @@ export default function ProfilePage() {
     try {
       await api.updateProfile({
         display_name: formData.display_name.trim(),
+        phone_number: formData.phone_number.trim(),
         bio: formData.bio.trim(),
         sport: formData.sport,
         teams: validTeams,
@@ -156,101 +159,116 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {!isPlayer ? (
-          <div className="text-center py-8">
-            <p className="text-gray-600 mb-4">Profile editing is available for players.</p>
-            <Link href={sp("/players")} className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark">
-              Become a Player
-            </Link>
+        <form onSubmit={handleSave} className="space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Display Name</label>
+            <input
+              type="text"
+              value={formData.display_name}
+              onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
+              className="w-full border rounded-lg px-3 py-2"
+              required
+            />
           </div>
-        ) : (
-          <form onSubmit={handleSave} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Display Name</label>
-              <input
-                type="text"
-                value={formData.display_name}
-                onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
-                className="w-full border rounded-lg px-3 py-2"
-                required
-              />
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Sport</label>
-              <select
-                value={formData.sport}
-                onChange={(e) => setFormData({ ...formData, sport: e.target.value })}
-                className="w-full border rounded-lg px-3 py-2"
-              >
-                <option value="Cricket">Cricket</option>
-                <option value="Soccer">Soccer</option>
-                <option value="Basketball">Basketball</option>
-                <option value="Football">Football</option>
-                <option value="Tennis">Tennis</option>
-                <option value="Baseball">Baseball</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Phone Number <span className="text-gray-400 font-normal">(for reward notifications)</span>
+            </label>
+            <input
+              type="tel"
+              value={formData.phone_number}
+              onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
+              className="w-full border rounded-lg px-3 py-2"
+              placeholder="+1 234 567 8900"
+            />
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Teams</label>
-              {formData.teams.map((team, idx) => (
-                <div key={idx} className="flex gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={team}
-                    onChange={(e) => {
-                      const updated = [...formData.teams];
-                      updated[idx] = e.target.value;
-                      setFormData({ ...formData, teams: updated });
-                    }}
-                    className="flex-1 border rounded-lg px-3 py-2"
-                    placeholder="e.g., Mumbai Indians"
-                  />
-                  {formData.teams.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const updated = formData.teams.filter((_, i) => i !== idx);
+          {isPlayer ? (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Sport</label>
+                <select
+                  value={formData.sport}
+                  onChange={(e) => setFormData({ ...formData, sport: e.target.value })}
+                  className="w-full border rounded-lg px-3 py-2"
+                >
+                  <option value="Cricket">Cricket</option>
+                  <option value="Soccer">Soccer</option>
+                  <option value="Basketball">Basketball</option>
+                  <option value="Football">Football</option>
+                  <option value="Tennis">Tennis</option>
+                  <option value="Baseball">Baseball</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Teams</label>
+                {formData.teams.map((team, idx) => (
+                  <div key={idx} className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={team}
+                      onChange={(e) => {
+                        const updated = [...formData.teams];
+                        updated[idx] = e.target.value;
                         setFormData({ ...formData, teams: updated });
                       }}
-                      className="text-red-500 text-sm px-2 hover:text-red-700"
-                    >
-                      Remove
-                    </button>
-                  )}
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={() => setFormData({ ...formData, teams: [...formData.teams, ""] })}
-                className="text-primary text-sm hover:underline"
-              >
-                + Add another team
-              </button>
-            </div>
+                      className="flex-1 border rounded-lg px-3 py-2"
+                      placeholder="e.g., Mumbai Indians"
+                    />
+                    {formData.teams.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = formData.teams.filter((_, i) => i !== idx);
+                          setFormData({ ...formData, teams: updated });
+                        }}
+                        className="text-red-500 text-sm px-2 hover:text-red-700"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, teams: [...formData.teams, ""] })}
+                  className="text-primary text-sm hover:underline"
+                >
+                  + Add another team
+                </button>
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
-              <textarea
-                value={formData.bio}
-                onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                className="w-full border rounded-lg px-3 py-2"
-                rows={4}
-                placeholder="Tell fans about yourself, your achievements, your career..."
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                <textarea
+                  value={formData.bio}
+                  onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                  className="w-full border rounded-lg px-3 py-2"
+                  rows={4}
+                  placeholder="Tell fans about yourself, your achievements, your career..."
+                />
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-4 bg-gray-50 rounded-lg">
+              <p className="text-gray-600 mb-3">Want to receive rewards as a player?</p>
+              <Link href={sp("/players")} className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark inline-block">
+                Become a Player
+              </Link>
             </div>
+          )}
 
-            <button
-              type="submit"
-              disabled={saving}
-              className="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary-dark disabled:opacity-50 font-medium"
-            >
-              {saving ? "Saving..." : "Save Changes"}
-            </button>
-          </form>
-        )}
+          <button
+            type="submit"
+            disabled={saving}
+            className="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary-dark disabled:opacity-50 font-medium"
+          >
+            {saving ? "Saving..." : "Save Changes"}
+          </button>
+        </form>
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ export interface User {
   email: string;
   display_name: string;
   avatar_url: string;
+  phone_number: string;
   role: "spectator" | "player" | "admin";
   sport: string;
   teams: string[];
