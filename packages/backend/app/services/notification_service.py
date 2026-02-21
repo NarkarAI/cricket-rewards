@@ -67,6 +67,10 @@ def _send_sms_sync(to_number: str, body: str) -> None:
 
 async def _send_sms(to_number: str, body: str) -> None:
     if not to_number:
+        logger.info("No phone number provided — skipping SMS")
+        return
+    if not to_number.startswith("+"):
+        logger.warning("Invalid phone number (missing + country code): %s — skipping SMS", to_number)
         return
     loop = asyncio.get_event_loop()
     await loop.run_in_executor(None, _send_sms_sync, to_number, body)
