@@ -6,6 +6,7 @@ export interface SportConfig {
   label: string;       // Display label for the sport
   sportValue: string;  // Value stored in user.sport field in DB
   tagline: string;     // Landing page tagline
+  color: string;       // Accent color for slideshow/branding
 }
 
 export const SPORTS: Record<SportSlug, SportConfig> = {
@@ -15,6 +16,7 @@ export const SPORTS: Record<SportSlug, SportConfig> = {
     label: "Cricket",
     sportValue: "Cricket",
     tagline: "Reward Your Favorite Cricket Players",
+    color: "#2563eb",
   },
   soccer: {
     slug: "soccer",
@@ -22,6 +24,7 @@ export const SPORTS: Record<SportSlug, SportConfig> = {
     label: "Soccer",
     sportValue: "Soccer",
     tagline: "Reward Your Favorite Soccer Players",
+    color: "#16a34a",
   },
   basketball: {
     slug: "basketball",
@@ -29,6 +32,7 @@ export const SPORTS: Record<SportSlug, SportConfig> = {
     label: "Basketball",
     sportValue: "Basketball",
     tagline: "Reward Your Favorite Basketball Players",
+    color: "#ea580c",
   },
   football: {
     slug: "football",
@@ -36,6 +40,7 @@ export const SPORTS: Record<SportSlug, SportConfig> = {
     label: "Football",
     sportValue: "Football",
     tagline: "Reward Your Favorite Football Players",
+    color: "#4f46e5",
   },
   tennis: {
     slug: "tennis",
@@ -43,6 +48,7 @@ export const SPORTS: Record<SportSlug, SportConfig> = {
     label: "Tennis",
     sportValue: "Tennis",
     tagline: "Reward Your Favorite Tennis Players",
+    color: "#65a30d",
   },
   baseball: {
     slug: "baseball",
@@ -50,6 +56,7 @@ export const SPORTS: Record<SportSlug, SportConfig> = {
     label: "Baseball",
     sportValue: "Baseball",
     tagline: "Reward Your Favorite Baseball Players",
+    color: "#dc2626",
   },
 };
 

@@ -10,6 +10,7 @@ export function Navbar() {
   const { user, loading } = useAuthContext();
   const router = useRouter();
   const pathname = usePathname();
+  const isRoot = pathname === "/";
   const sport = getSportFromPath(pathname);
   const config = SPORTS[sport];
 
@@ -26,8 +27,8 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-14 items-center">
           {/* Logo */}
-          <Link href={`/${sport}`} className="text-xl font-bold text-primary">
-            {config.name}
+          <Link href={isRoot ? "/" : `/${sport}`} className="text-xl font-bold text-primary">
+            {isRoot ? "RewardsByFan" : config.name}
           </Link>
 
           {/* Mobile: just avatar or login link (navigation is in BottomNav) */}
