@@ -49,11 +49,6 @@ class Settings(BaseSettings):
     smtp_from_email: str = "noreply@rewardsbyfan.com"
     smtp_from_name: str = "RewardsByFan"
 
-    # SMS (Twilio)
-    twilio_account_sid: str = ""
-    twilio_auth_token: str = ""
-    twilio_from_number: str = ""
-
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",")]

@@ -10,6 +10,7 @@ from app.auth.dependencies import get_current_user
 from app.config import settings
 from app.dependencies import get_client_ip
 from app.models.user import GeoInfo, User
+from pydantic import BaseModel
 from app.schemas.user import GeoResponse, UserResponse, UserUpdateRequest
 from app.services.geo_service import detect_geo
 
@@ -182,6 +183,30 @@ async def get_banner(filename: str):
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="Banner not found")
     return FileResponse(path=str(file_path))
+
+
+class FcmTokenRequest(BaseModel):
+    token: str
+
+
+@router.post("/me/fcm-token")
+async def save_fcm_token(req: FcmTokenRequest, user: User = Depends(get_current_user)):
+    """Save an FCM push notification token for this user."""
+    if req.token and req.token not in user.fcm_tokens:
+        user.fcm_tokens.append(req.token)
+        user.updated_at = datetime.utcnow()
+        await user.save()
+    return {"status": "ok"}
+
+
+@router.delete("/me/fcm-token")
+async def remove_fcm_token(req: FcmTokenRequest, user: User = Depends(get_current_user)):
+    """Remove an FCM push notification token for this user."""
+    if req.token in user.fcm_tokens:
+        user.fcm_tokens.remove(req.token)
+        user.updated_at = datetime.utcnow()
+        await user.save()
+    return {"status": "ok"}
 
 
 @router.get("/{user_id}", response_model=UserResponse)

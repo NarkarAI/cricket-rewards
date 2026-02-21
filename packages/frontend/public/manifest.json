@@ -1,13 +1,14 @@
 {
-  "name": "CricRewards - Cricket Fan Rewards",
-  "short_name": "CricRewards",
-  "description": "Reward your favorite cricket players with real money",
+  "name": "RewardsByFan - Sports Fan Rewards",
+  "short_name": "RewardsByFan",
+  "description": "Reward your favorite sports players with real money",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f9fafb",
   "theme_color": "#2563eb",
   "orientation": "portrait-primary",
   "scope": "/",
+  "gcm_sender_id": "103953800507",
   "icons": [
     {
       "src": "/icons/icon-192.png",

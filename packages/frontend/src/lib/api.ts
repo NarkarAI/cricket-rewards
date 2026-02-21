@@ -72,6 +72,12 @@ export const api = {
     return res.json();
   },
 
+  // Push notifications
+  saveFcmToken: (token: string) =>
+    request("/api/v1/users/me/fcm-token", { method: "POST", body: JSON.stringify({ token }) }),
+  removeFcmToken: (token: string) =>
+    request("/api/v1/users/me/fcm-token", { method: "DELETE", body: JSON.stringify({ token }) }),
+
   // Players
   listPlayers: (page = 1, search = "", sport = "") => {
     let url = `/api/v1/players/?page=${page}&search=${encodeURIComponent(search)}`;

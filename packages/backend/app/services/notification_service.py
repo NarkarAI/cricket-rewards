@@ -1,4 +1,4 @@
-"""Notification service for sending email and SMS on reward events."""
+"""Notification service for sending email and push notifications on reward events."""
 
 import asyncio
 import logging
@@ -6,18 +6,13 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 import aiosmtplib
-from twilio.rest import Client as TwilioClient
+from firebase_admin import messaging
 
+from app.auth.firebase import init_firebase
 from app.config import settings
 from app.models.user import User
 
 logger = logging.getLogger(__name__)
-
-
-def _twilio_client() -> TwilioClient | None:
-    if settings.twilio_account_sid and settings.twilio_auth_token:
-        return TwilioClient(settings.twilio_account_sid, settings.twilio_auth_token)
-    return None
 
 
 def _smtp_configured() -> bool:
@@ -49,31 +44,37 @@ async def _send_email(to_email: str, subject: str, html_body: str) -> None:
         logger.exception("Failed to send email to %s", to_email)
 
 
-def _send_sms_sync(to_number: str, body: str) -> None:
-    client = _twilio_client()
-    if not client:
-        logger.warning("Twilio not configured — skipping SMS to %s", to_number)
+def _send_push_sync(tokens: list[str], title: str, body: str) -> None:
+    """Send push notification to FCM tokens (blocking, run in executor)."""
+    if not tokens:
         return
-    try:
-        client.messages.create(
-            body=body,
-            from_=settings.twilio_from_number,
-            to=to_number,
+    init_firebase()
+    messages = [
+        messaging.Message(
+            notification=messaging.Notification(title=title, body=body),
+            token=token,
         )
-        logger.info("SMS sent to %s", to_number)
+        for token in tokens
+    ]
+    try:
+        response = messaging.send_each(messages)
+        logger.info(
+            "Push sent: %d success, %d failure",
+            response.success_count,
+            response.failure_count,
+        )
     except Exception:
-        logger.exception("Failed to send SMS to %s", to_number)
+        logger.exception("Failed to send push notifications")
 
 
-async def _send_sms(to_number: str, body: str) -> None:
-    if not to_number:
-        logger.info("No phone number provided — skipping SMS")
-        return
-    if not to_number.startswith("+"):
-        logger.warning("Invalid phone number (missing + country code): %s — skipping SMS", to_number)
+async def _send_push(user_id: str, title: str, body: str) -> None:
+    """Send push notification to all of a user's devices."""
+    user = await User.get(user_id)
+    if not user or not user.fcm_tokens:
+        logger.info("No FCM tokens for user %s — skipping push", user_id)
         return
     loop = asyncio.get_event_loop()
-    await loop.run_in_executor(None, _send_sms_sync, to_number, body)
+    await loop.run_in_executor(None, _send_push_sync, user.fcm_tokens, title, body)
 
 
 def _format_amount(amount, currency: str) -> str:
@@ -106,10 +107,8 @@ async def notify_reward_success(reward) -> None:
             <p style="color: #666; font-size: 14px;">— The RewardsByFan Team</p>
         </div>
         """
-        sender_sms = (
-            f"RewardsByFan: Your reward of {amount_str} to "
-            f"{receiver.display_name} was successful! Thank you for your support."
-        )
+        sender_push_title = "Reward Successful!"
+        sender_push_body = f"Your reward of {amount_str} to {receiver.display_name} was successful!"
 
         # --- Player (receiver) notifications ---
         receiver_subject = "You Received a Reward! - RewardsByFan"
@@ -125,17 +124,15 @@ async def notify_reward_success(reward) -> None:
             <p style="color: #666; font-size: 14px;">— The RewardsByFan Team</p>
         </div>
         """
-        receiver_sms = (
-            f"RewardsByFan: You received a reward of {net_str} from "
-            f"{sender.display_name or 'a fan'}! Check your wallet."
-        )
+        receiver_push_title = "New Reward Received!"
+        receiver_push_body = f"You received {net_str} from {sender.display_name or 'a fan'}!"
 
         # Fire all notifications concurrently
         await asyncio.gather(
             _send_email(sender.email, sender_subject, sender_html),
-            _send_sms(sender.phone_number, sender_sms),
+            _send_push(reward.sender_id, sender_push_title, sender_push_body),
             _send_email(receiver.email, receiver_subject, receiver_html),
-            _send_sms(receiver.phone_number, receiver_sms),
+            _send_push(reward.receiver_id, receiver_push_title, receiver_push_body),
             return_exceptions=True,
         )
     except Exception:
@@ -164,14 +161,12 @@ async def notify_reward_failure(reward) -> None:
             <p style="color: #666; font-size: 14px;">— The RewardsByFan Team</p>
         </div>
         """
-        sms_body = (
-            f"RewardsByFan: Your reward of {amount_str} was unsuccessful. "
-            f"Please try again."
-        )
+        push_title = "Reward Unsuccessful"
+        push_body = f"Your reward of {amount_str} was unsuccessful. Please try again."
 
         await asyncio.gather(
             _send_email(sender.email, subject, html_body),
-            _send_sms(sender.phone_number, sms_body),
+            _send_push(reward.sender_id, push_title, push_body),
             return_exceptions=True,
         )
     except Exception:

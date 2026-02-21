@@ -34,6 +34,7 @@ class User(Document):
     display_name: str = ""
     avatar_url: str = ""
     phone_number: str = ""
+    fcm_tokens: list[str] = []
 
     role: str = Field(default="spectator")  # spectator | player | admin
 

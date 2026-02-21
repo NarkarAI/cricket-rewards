@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { auth, onAuthStateChanged, type FirebaseUser } from "@/lib/firebase";
+import { auth, onAuthStateChanged, requestPushPermission, type FirebaseUser } from "@/lib/firebase";
 import { api } from "@/lib/api";
 import type { User } from "@/types";
 
@@ -10,6 +10,17 @@ function setAuthCookie(token: string | null) {
     document.cookie = `firebase-auth-token=${token}; path=/; max-age=3600; SameSite=Lax`;
   } else {
     document.cookie = "firebase-auth-token=; path=/; max-age=0";
+  }
+}
+
+async function registerPushToken() {
+  try {
+    const token = await requestPushPermission();
+    if (token) {
+      await api.saveFcmToken(token);
+    }
+  } catch {
+    // Push registration is best-effort
   }
 }
 
@@ -28,6 +39,7 @@ export function useAuth() {
           try {
             const me = await api.getMe();
             setUser(me);
+            registerPushToken();
           } catch {
             // User exists in Firebase but not backend (e.g. new Google sign-in)
             // Auto-register them
@@ -35,6 +47,7 @@ export function useAuth() {
               await api.register(token, fbUser.displayName || "");
               const me = await api.getMe();
               setUser(me);
+              registerPushToken();
             } catch {
               setUser(null);
               setAuthCookie(null);

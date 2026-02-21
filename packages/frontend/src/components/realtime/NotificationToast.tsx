@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSocketContext } from "./SocketProvider";
+import { onForegroundMessage } from "@/lib/firebase";
 
 interface Notification {
   id: number;
@@ -58,6 +59,22 @@ export function NotificationToast() {
       socket.off("kyc:status");
     };
   }, [socket]);
+
+  // FCM foreground push messages
+  useEffect(() => {
+    const unsub = onForegroundMessage((payload) => {
+      const title = payload.notification?.title || "";
+      const body = payload.notification?.body || "";
+      if (title || body) {
+        const id = ++notifId;
+        setNotifications((prev) => [...prev, { id, message: body || title, type: "reward" }]);
+        setTimeout(() => {
+          setNotifications((prev) => prev.filter((n) => n.id !== id));
+        }, 5000);
+      }
+    });
+    return () => { if (unsub) unsub(); };
+  }, []);
 
   if (notifications.length === 0) return null;
 
